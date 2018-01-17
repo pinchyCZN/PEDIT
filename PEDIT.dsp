@@ -68,7 +68,8 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /YX /FD /GZ /c
-# ADD CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /I "..\WXWIDGETS\INCLUDE" /I "..\WXWIDGETS\INCLUDE\MSVC" /I "..\WXWIDGETS\CONTRIB\INCLUDE" /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /D "_UNICODE" /FR /YX /FD /GZ /c
+# ADD CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /I ".\WXWIDGETS\INCLUDE" /I ".\WXWIDGETS\INCLUDE\MSVC" /I ".\WXWIDGETS\CONTRIB\INCLUDE" /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /D "_UNICODE" /FR /FD /GZ /c
+# SUBTRACT CPP /YX
 # ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x409 /d "_DEBUG"
@@ -78,7 +79,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:windows /debug /machine:I386 /pdbtype:sept
-# ADD LINK32 wxbase28ud.lib wxmsw28ud_stc.lib kernel32.lib user32.lib gdi32.lib comdlg32.lib winspool.lib winmm.lib shell32.lib comctl32.lib ole32.lib oleaut32.lib uuid.lib rpcrt4.lib advapi32.lib wsock32.lib odbc32.lib oleacc.lib /nologo /subsystem:windows /debug /machine:I386 /pdbtype:sept /libpath:"..\WXWIDGETS\LIB\VC_LIB"
+# ADD LINK32 wxbase28ud.lib wxmsw28ud_stc.lib kernel32.lib user32.lib gdi32.lib comdlg32.lib winspool.lib winmm.lib shell32.lib comctl32.lib ole32.lib oleaut32.lib uuid.lib rpcrt4.lib advapi32.lib wsock32.lib odbc32.lib oleacc.lib /nologo /subsystem:windows /debug /machine:I386 /pdbtype:sept /libpath:".\WXWIDGETS\LIB\VC_LIB"
 # SUBTRACT LINK32 /map /nodefaultlib
 
 !ENDIF 
@@ -92,12 +93,40 @@ LINK32=link.exe
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 # Begin Source File
 
+SOURCE=.\notebook_manager.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\pedit.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\window_manager.cpp
 # End Source File
 # End Group
 # Begin Group "Header Files"
 
 # PROP Default_Filter "h;hpp;hxx;hm;inl"
+# Begin Source File
+
+SOURCE=.\wxWidgets\include\wx\aui\aui.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\wxWidgets\include\wx\aui\framemanager.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\notebook_manager.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\wxWidgets\contrib\include\wx\stc\stc.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\window_manager.h
+# End Source File
 # End Group
 # Begin Group "Resource Files"
 
