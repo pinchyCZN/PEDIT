@@ -1,16 +1,7 @@
-#ifndef _NOTEBOOK_MANAGER_H
-#define _NOTEBOOK_MANAGER_H
+#ifndef _TAB_ART_H_
+#define _TAB_ART_H_
 #include <wx/wx.h>
 #include <wx/aui/aui.h>
-
-class CustomNotebook : public wxAuiNotebook
-{
-public:
-	CustomNotebook();
-
-	void OnRender(wxAuiManagerEvent& evt);
-	void TabRender(wxDC* raw_dc, wxWindow* wnd);
-};
 
 class CustomTabArt : public wxAuiTabArt
 {
@@ -98,6 +89,6 @@ protected:
 
 
 
-#endif //_NOTEBOOK_MANAGER_H
+#endif //_TAB_ART_H_
 
 

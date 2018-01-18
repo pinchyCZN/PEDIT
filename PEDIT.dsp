@@ -93,11 +93,19 @@ LINK32=link.exe
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 # Begin Source File
 
-SOURCE=.\notebook_manager.cpp
+SOURCE=.\console.c
 # End Source File
 # Begin Source File
 
 SOURCE=.\pedit.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\tab_art.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\window.c
 # End Source File
 # Begin Source File
 
@@ -114,10 +122,6 @@ SOURCE=.\wxWidgets\include\wx\aui\aui.h
 # Begin Source File
 
 SOURCE=.\wxWidgets\include\wx\aui\framemanager.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\notebook_manager.h
 # End Source File
 # Begin Source File
 

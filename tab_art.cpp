@@ -1,11 +1,39 @@
-#include "notebook_manager.h"
+#include "tab_art.h"
 #ifdef __WXMSW__
 #include  "wx/msw/private.h"
 #endif
 
-CustomNotebook::CustomNotebook():wxAuiNotebook()
+unsigned char wxAuiBlendColour(unsigned char fg, unsigned char bg, double alpha);
+wxColor wxAuiStepColour(const wxColor& c, int ialpha);
+wxBitmap wxAuiBitmapFromBits(const unsigned char bits[], int w, int h,
+                             const wxColour& color);
+wxString wxAuiChopText(wxDC& dc, const wxString& text, int max_size);
+
+class wxAuiCommandCapture : public wxEvtHandler
 {
-}
+public:
+
+    wxAuiCommandCapture() { m_last_id = 0; }
+    int GetCommandId() const { return m_last_id; }
+
+    bool ProcessEvent(wxEvent& evt)
+    {
+        if (evt.GetEventType() == wxEVT_COMMAND_MENU_SELECTED)
+        {
+            m_last_id = evt.GetId();
+            return true;
+        }
+
+        if (GetNextHandler())
+            return GetNextHandler()->ProcessEvent(evt);
+
+        return false;
+    }
+
+private:
+    int m_last_id;
+};
+
 #if defined( __WXMAC__ )
  static unsigned char close_bits[]={
      0xFF, 0xFF, 0xFF, 0xFF, 0x0F, 0xFE, 0x03, 0xF8, 0x01, 0xF0, 0x19, 0xF3,
@@ -37,44 +65,7 @@ static unsigned char list_bits[] = {
    0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
    0x0f, 0xf8, 0xff, 0xff, 0x0f, 0xf8, 0x1f, 0xfc, 0x3f, 0xfe, 0x7f, 0xff,
    0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
-// wxAuiBitmapFromBits() is a utility function that creates a
-// masked bitmap from raw bits (XBM format)
-wxBitmap wxAuiBitmapFromBits(const unsigned char bits[], int w, int h,
-                             const wxColour& color)
-{
-    wxImage img = wxBitmap((const char*)bits, w, h).ConvertToImage();
-    img.Replace(0,0,0,123,123,123);
-    img.Replace(255,255,255,color.Red(),color.Green(),color.Blue());
-    img.SetMaskColour(123,123,123);
-    return wxBitmap(img);
-}
-wxString wxAuiChopText(wxDC& dc, const wxString& text, int max_size)
-{
-    wxCoord x,y;
 
-    // first check if the text fits with no problems
-    dc.GetTextExtent(text, &x, &y);
-    if (x <= max_size)
-        return text;
-
-    size_t i, len = text.Length();
-    size_t last_good_length = 0;
-    for (i = 0; i < len; ++i)
-    {
-        wxString s = text.Left(i);
-        s += wxT("...");
-
-        dc.GetTextExtent(s, &x, &y);
-        if (x > max_size)
-            break;
-
-        last_good_length = i;
-    }
-
-    wxString ret = text.Left(last_good_length);
-    ret += wxT("...");
-    return ret;
-}
 static void DrawFocusRect(wxWindow* win, wxDC& dc, const wxRect& rect, int flags)
 {
 #ifdef __WXMSW__
@@ -163,7 +154,7 @@ static void DrawFocusRect(wxWindow* win, wxDC& dc, const wxRect& rect, int flags
             x2 = rect.GetRight(),
             y2 = rect.GetBottom();
 
-    dc.SetPen(*wxBLACK_PEN);
+    dc.SetPen(*wxRED_PEN);
 
 #ifdef __WXMAC__
     dc.SetLogicalFunction(wxCOPY);
@@ -192,57 +183,7 @@ static void DrawFocusRect(wxWindow* win, wxDC& dc, const wxRect& rect, int flags
     dc.SetLogicalFunction(wxCOPY);
 #endif
 }
-// wxAuiBlendColour is used by wxAuiStepColour
-unsigned char wxAuiBlendColour(unsigned char fg, unsigned char bg, double alpha)
-{
-    double result = bg + (alpha * (fg - bg));
-    if (result < 0.0)
-        result = 0.0;
-    if (result > 255)
-        result = 255;
-    return (unsigned char)result;
-}
 
-// wxAuiStepColour() it a utility function that simply darkens
-// or lightens a color, based on the specified percentage
-// ialpha of 0 would be completely black, 100 completely white
-// an ialpha of 100 returns the same colour
-wxColor wxAuiStepColour(const wxColor& c, int ialpha)
-{
-    if (ialpha == 100)
-        return c;
-
-    unsigned char r = c.Red(),
-                  g = c.Green(),
-                  b = c.Blue();
-    unsigned char bg;
-
-    // ialpha is 0..200 where 0 is completely black
-    // and 200 is completely white and 100 is the same
-    // convert that to normal alpha 0.0 - 1.0
-    ialpha = wxMin(ialpha, 200);
-    ialpha = wxMax(ialpha, 0);
-    double alpha = ((double)(ialpha - 100.0))/100.0;
-
-    if (ialpha > 100)
-    {
-        // blend with white
-        bg = 255;
-        alpha = 1.0 - alpha;  // 0 = transparent fg; 1 = opaque fg
-    }
-    else
-    {
-        // blend with black
-        bg = 0;
-        alpha += 1.0;         // 0 = transparent fg; 1 = opaque fg
-    }
-
-    r = wxAuiBlendColour(r, bg, alpha);
-    g = wxAuiBlendColour(g, bg, alpha);
-    b = wxAuiBlendColour(b, bg, alpha);
-
-    return wxColour(r, g, b);
-}
 static void DrawButtons(wxDC& dc,
                         const wxRect& _rect,
                         const wxBitmap& bmp,
@@ -287,7 +228,7 @@ CustomTabArt::CustomTabArt()
 
     wxColour background_colour = base_colour;
     wxColour normaltab_colour = base_colour;
-    wxColour selectedtab_colour = *wxWHITE;
+    wxColour selectedtab_colour = wxSystemSettings::GetColour(wxSYS_COLOUR_3DFACE);
 
     m_bkbrush = wxBrush(background_colour);
     m_normal_bkbrush = wxBrush(normaltab_colour);
@@ -457,9 +398,8 @@ void CustomTabArt::DrawTab(wxDC& dc,
 
     dc.DrawPolygon(WXSIZEOF(points) - 1, points);
 
-    dc.SetPen(*wxGREY_PEN);
+    dc.SetPen(wxSystemSettings::GetColour(wxSYS_COLOUR_BTNHIGHLIGHT));
 
-    //dc.DrawLines(active ? WXSIZEOF(points) - 1 : WXSIZEOF(points), points);
     dc.DrawLines(WXSIZEOF(points), points);
 
 
@@ -485,6 +425,7 @@ void CustomTabArt::DrawTab(wxDC& dc,
                           caption,
                           tab_width - (text_offset-tab_x) - close_button_width);
 
+	dc.SetTextForeground(wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOWTEXT));
     // draw tab text
     dc.DrawText(draw_text,
                  text_offset,

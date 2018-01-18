@@ -18,8 +18,13 @@ public:
 
     PEDIT* m_frame;
 };
+extern "C" void open_console();
 bool PEDIT_APP::OnInit()
 {
+#ifdef _DEBUG
+	open_console();
+#endif
+
 	m_frame=new PEDIT(NULL);
 	m_frame->SetupPanes();
 	SetTopWindow(m_frame);
