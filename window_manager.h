@@ -28,6 +28,7 @@ public:
 	wxStatusBar m_statusbar;
 
 	void PEDIT::onkey(wxStyledTextEvent &evt);
+	void PEDIT::TMP_EVENT(wxEvent &event);
 
 	bool AddEdit(const wxString &title=wxT("BLANK"));
 	bool AddEdit(const wxString &title,wxAuiNotebook &book);

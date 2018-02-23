@@ -9,23 +9,35 @@ void PEDIT::onkey(wxStyledTextEvent &evt)
 	int tmp;
 	tmp=evt.GetModifiers();
 	tmp=evt.GetModificationType();
-	printf("tmp=%i\n",tmp);
+	//printf("tmp=%i\n",tmp);
 	if(tmp&(wxSTC_MOD_INSERTTEXT|wxSTC_MOD_DELETETEXT)){
 		wxStyledTextCtrl *stc;
 		//=(wxStyledTextCtrl*)(m_notebook.GetPage(0));
 		stc=(wxStyledTextCtrl *)evt.GetEventObject();
-		stc->StyleSetBackground(i,wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOW));
-		printf("i=%i\n",i);
+		//stc->StyleSetBackground(i,wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOW));
+		//printf("i=%i\n",i);
 		i++;
 	}
-
 
 }
 void SetupEditor(wxStyledTextCtrl &stc)
 {
-	stc.StyleSetBackground(wxSTC_STYLE_DEFAULT,wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOW));
-	stc.StyleSetForeground(wxSTC_STYLE_DEFAULT,wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOWTEXT));
-	stc.StyleSetForeground(wxSTC_STYLE_DEFAULT,wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOWTEXT));
+	wxColour fg,bg,cwin;
+	fg=wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOWTEXT);
+	bg=wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOW);
+	cwin=wxSystemSettings::GetColour(wxSYS_COLOUR_BTNFACE);
+
+	stc.StyleSetForeground(wxSTC_STYLE_DEFAULT,fg);
+	stc.StyleSetBackground(wxSTC_STYLE_DEFAULT,bg);
+
+	stc.StyleSetForeground(0,fg);
+	stc.StyleSetBackground(0,bg);
+
+	//stc.SetMarginWidth(0,20);
+	//stc.StyleSetForeground(wxSTC_STYLE_LINENUMBER,fg);
+	//stc.StyleSetBackground(wxSTC_STYLE_LINENUMBER,cwin);
+	//stc.SetMarginType(0,wxSTC_MARGIN_NUMBER);
+
 }
 
 bool PEDIT::AddEdit(const wxString &title,wxAuiNotebook &book)
@@ -33,7 +45,7 @@ bool PEDIT::AddEdit(const wxString &title,wxAuiNotebook &book)
 	wxStyledTextCtrl *stc;
 	stc=new wxStyledTextCtrl(this);
 	SetupEditor(*stc);
-	//stc->Connect(wxEVT_STC_KEY,wxStyledTextEventFunction(PEDIT::onkey));
+	stc->Connect(wxEVT_KEY_DOWN,wxKeyEventHandler(PEDIT::OnKey));
 	stc->Connect(wxEVT_STC_MODIFIED,wxStyledTextEventHandler(PEDIT::onkey));
 		//(wxObject *)stc);
 	return book.AddPage(stc,title);
@@ -98,6 +110,7 @@ void PEDIT::SetupPanes()
 	wxTextCtrl* text2 = new wxTextCtrl(this, -1, wxT("Pane 2 - sample text"),
 		wxDefaultPosition, wxSize(200,150),
 		wxNO_BORDER | wxTE_MULTILINE);
+//	text.Connect(
 	
 	wxTextCtrl* text3 = new wxTextCtrl(this, -1, wxT("Main content window"),
 		wxDefaultPosition, wxSize(200,150),
@@ -110,20 +123,38 @@ void PEDIT::SetupPanes()
 	AddEdit(wxT("tert"));
 	AddEdit(wxT("tert"));
 	AddAltEdit(wxT("werwer"));
-	m_notebook.GetPage(0);
-	m_mgr.AddPane(&m_notebook,wxCENTER,wxT("234243"));
-	m_mgr.AddPane(&m_altbook,wxCENTER,wxT("345345"));
+	AddAltEdit(wxT("werwer"));
+	wxStyledTextCtrl *stc=(wxStyledTextCtrl*)m_notebook.GetPage(0);
+	int i;
+	for(i=0;i<1000;i++)
+		stc->AddText(wxT("smaple text\r\n"));
+	stc=(wxStyledTextCtrl*)m_altbook.GetPage(0);
+	for(i=0;i<1000;i++)
+		stc->AddText(wxT("smaple text\r\n"));
+	m_mgr.AddPane(&m_notebook,wxCENTER,wxT("notebook"));
+	m_mgr.AddPane(&m_altbook,wxCENTER,wxT("altbooka"));
 	m_mgr.Update();
 	
+}
+void PEDIT::TMP_EVENT(wxEvent &event)
+{
+	exit(0);
 }
 void PEDIT::OnKey(wxKeyEvent &event)
 {
 	if(event.m_keyCode==VK_ESCAPE){
-		Close();
+		wxCloseEvent tmp(wxEVT_CLOSE_WINDOW, m_windowId);
+		tmp.SetEventObject(this);
+		tmp.SetCanVeto(false);
+		wxPostEvent(this,tmp);
+		exit(0);
+//		Close(true);
 	}
+	wxKeyEvent::DoAllowNextEvent();
 }
 PEDIT::~PEDIT()
 {
+	m_mgr.UnInit();
 }
 
 
