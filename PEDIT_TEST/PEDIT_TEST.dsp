@@ -67,7 +67,7 @@ LINK32=link.exe
 # PROP Intermediate_Dir "Debug"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /YX /FD /GZ /c
-# ADD CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /YX /FD /GZ /c
+# ADD CPP /nologo /W3 /Gm /GX /ZI /Od /I "..\wxWidgets\contrib\src\stc\scintilla\include\\" /I "..\wxWidgets\contrib\src\stc\scintilla\src\\" /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /FR /YX /FD /GZ /c
 # ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x409 /d "_DEBUG"
@@ -88,6 +88,338 @@ LINK32=link.exe
 # Begin Group "Source Files"
 
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
+# Begin Source File
+
+SOURCE=..\wxWidgets\contrib\src\stc\scintilla\src\AutoComplete.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\wxWidgets\contrib\src\stc\scintilla\src\CallTip.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\wxWidgets\contrib\src\stc\scintilla\src\CellBuffer.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\wxWidgets\contrib\src\stc\scintilla\src\CharClassify.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\wxWidgets\contrib\src\stc\scintilla\src\ContractionState.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\wxWidgets\contrib\src\stc\scintilla\src\Document.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\wxWidgets\contrib\src\stc\scintilla\src\DocumentAccessor.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\wxWidgets\contrib\src\stc\scintilla\src\Editor.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\wxWidgets\contrib\src\stc\scintilla\src\ExternalLexer.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\wxWidgets\contrib\src\stc\scintilla\src\Indicator.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\wxWidgets\contrib\src\stc\scintilla\src\KeyMap.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\wxWidgets\contrib\src\stc\scintilla\src\KeyWords.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\wxWidgets\contrib\src\stc\scintilla\src\LexAda.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\wxWidgets\contrib\src\stc\scintilla\src\LexAPDL.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\wxWidgets\contrib\src\stc\scintilla\src\LexAsm.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\wxWidgets\contrib\src\stc\scintilla\src\LexAsn1.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\wxWidgets\contrib\src\stc\scintilla\src\LexAU3.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\wxWidgets\contrib\src\stc\scintilla\src\LexAVE.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\wxWidgets\contrib\src\stc\scintilla\src\LexBaan.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\wxWidgets\contrib\src\stc\scintilla\src\LexBash.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\wxWidgets\contrib\src\stc\scintilla\src\LexBasic.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\wxWidgets\contrib\src\stc\scintilla\src\LexBullant.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\wxWidgets\contrib\src\stc\scintilla\src\LexCaml.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\wxWidgets\contrib\src\stc\scintilla\src\LexCLW.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\wxWidgets\contrib\src\stc\scintilla\src\LexConf.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\wxWidgets\contrib\src\stc\scintilla\src\LexCPP.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\wxWidgets\contrib\src\stc\scintilla\src\LexCrontab.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\wxWidgets\contrib\src\stc\scintilla\src\LexCsound.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\wxWidgets\contrib\src\stc\scintilla\src\LexCSS.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\wxWidgets\contrib\src\stc\scintilla\src\LexEiffel.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\wxWidgets\contrib\src\stc\scintilla\src\LexErlang.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\wxWidgets\contrib\src\stc\scintilla\src\LexEScript.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\wxWidgets\contrib\src\stc\scintilla\src\LexFlagship.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\wxWidgets\contrib\src\stc\scintilla\src\LexForth.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\wxWidgets\contrib\src\stc\scintilla\src\LexFortran.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\wxWidgets\contrib\src\stc\scintilla\src\LexGui4Cli.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\wxWidgets\contrib\src\stc\scintilla\src\LexHaskell.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\wxWidgets\contrib\src\stc\scintilla\src\LexHTML.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\wxWidgets\contrib\src\stc\scintilla\src\LexInno.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\wxWidgets\contrib\src\stc\scintilla\src\LexKix.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\wxWidgets\contrib\src\stc\scintilla\src\LexLisp.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\wxWidgets\contrib\src\stc\scintilla\src\LexLout.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\wxWidgets\contrib\src\stc\scintilla\src\LexLua.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\wxWidgets\contrib\src\stc\scintilla\src\LexMatlab.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\wxWidgets\contrib\src\stc\scintilla\src\LexMetapost.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\wxWidgets\contrib\src\stc\scintilla\src\LexMMIXAL.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\wxWidgets\contrib\src\stc\scintilla\src\LexMPT.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\wxWidgets\contrib\src\stc\scintilla\src\LexMSSQL.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\wxWidgets\contrib\src\stc\scintilla\src\LexNsis.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\wxWidgets\contrib\src\stc\scintilla\src\LexOpal.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\wxWidgets\contrib\src\stc\scintilla\src\LexOthers.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\wxWidgets\contrib\src\stc\scintilla\src\LexPascal.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\wxWidgets\contrib\src\stc\scintilla\src\LexPB.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\wxWidgets\contrib\src\stc\scintilla\src\LexPerl.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\wxWidgets\contrib\src\stc\scintilla\src\LexPOV.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\wxWidgets\contrib\src\stc\scintilla\src\LexPS.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\wxWidgets\contrib\src\stc\scintilla\src\LexPython.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\wxWidgets\contrib\src\stc\scintilla\src\LexRebol.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\wxWidgets\contrib\src\stc\scintilla\src\LexRuby.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\wxWidgets\contrib\src\stc\scintilla\src\LexScriptol.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\wxWidgets\contrib\src\stc\scintilla\src\LexSmalltalk.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\wxWidgets\contrib\src\stc\scintilla\src\LexSpecman.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\wxWidgets\contrib\src\stc\scintilla\src\LexSpice.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\wxWidgets\contrib\src\stc\scintilla\src\LexSQL.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\wxWidgets\contrib\src\stc\scintilla\src\LexTADS3.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\wxWidgets\contrib\src\stc\scintilla\src\LexTCL.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\wxWidgets\contrib\src\stc\scintilla\src\LexTeX.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\wxWidgets\contrib\src\stc\scintilla\src\LexVB.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\wxWidgets\contrib\src\stc\scintilla\src\LexVerilog.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\wxWidgets\contrib\src\stc\scintilla\src\LexVHDL.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\wxWidgets\contrib\src\stc\scintilla\src\LexYAML.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\wxWidgets\contrib\src\stc\scintilla\src\LineMarker.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=.\pedit_test.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\include\PlatWin.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\wxWidgets\contrib\src\stc\scintilla\src\PropSet.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\wxWidgets\contrib\src\stc\scintilla\src\RESearch.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\wxWidgets\contrib\src\stc\scintilla\src\ScintillaBase.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\wxWidgets\contrib\src\stc\scintilla\src\Style.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\wxWidgets\contrib\src\stc\scintilla\src\StyleContext.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\wxWidgets\contrib\src\stc\scintilla\src\UniConversion.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\wxWidgets\contrib\src\stc\scintilla\src\ViewStyle.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\wxWidgets\contrib\src\stc\scintilla\src\WindowAccessor.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\wxWidgets\contrib\src\stc\scintilla\src\XPM.cxx
+# End Source File
 # End Group
 # Begin Group "Header Files"
 
