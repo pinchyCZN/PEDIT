@@ -21,6 +21,7 @@
 #include "Platform.h"
 
 #include "Scintilla.h"
+extern "C" bool Scintilla_RegisterClasses(void *hInstance);
 #include "SString.h"
 #ifdef SCI_LEXER
 #include "SciLexer.h"
