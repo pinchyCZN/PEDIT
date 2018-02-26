@@ -9,3 +9,7 @@
 *.pdb
 *.plg
 *.sbr
+*.lib
+*.exp
+*.aps
+*.res

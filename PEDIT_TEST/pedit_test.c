@@ -1,5 +1,3 @@
-#define WINVER 0x500
-#define _WIN32_WINNT 0x500
 #include <windows.h>
 #include <commctrl.h>
 #include "scintilla.h"
@@ -17,23 +15,33 @@ int setup_debug(HWND hwnd)
 	move_console(0,rect.bottom);
 	return 0;
 }
+//int setup_
 int setup_panels(HWND hwnd)
 {
+	int result=FALSE;
+	add_statusbar(hwnd);
+	add_menubar(hwnd);
+	//add_edit_pane(hwnd);
+	//add_edit();
+	/*
 	hscint=CreateWindowEx(0,TEXT("Scintilla"),TEXT("Main edit"),WS_CHILD|WS_VISIBLE|WS_TABSTOP|WS_CLIPCHILDREN,
 				0,0,100,100,hwnd,0,ghinstance,0);
-
+*/
+	return result;
 }
 BOOL CALLBACK DialogProc(HWND hwnd,UINT msg,WPARAM wparam,LPARAM lparam)
 {
 
-	if(!(msg==WM_SETCURSOR || msg==WM_NCHITTEST || msg==WM_MOUSEFIRST || msg==WM_NCMOUSEMOVE))
-		print_msg(msg,wparam,lparam);
 	switch(msg){
 	case WM_INITDIALOG:
 		{
 			setup_debug(hwnd);
 			setup_panels(hwnd);
 		}
+		break;
+	case WM_MOVE:
+	case WM_MOVING:
+		window_move(hwnd);
 		break;
 	case WM_CLOSE:
 		DestroyWindow(hwnd);

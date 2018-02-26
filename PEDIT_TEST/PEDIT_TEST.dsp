@@ -43,7 +43,7 @@ RSC=rc.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /YX /FD /c
-# ADD CPP /nologo /W3 /GX /O2 /I "..\wxWidgets\contrib\src\stc\scintilla\include\\" /I "..\wxWidgets\contrib\src\stc\scintilla\src\\" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /YX /FD /c
+# ADD CPP /nologo /W3 /GX /O2 /I "..\wxWidgets\contrib\src\stc\scintilla\include\\" /I "..\wxWidgets\contrib\src\stc\scintilla\src\\" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D WINVER=0x600 /YX /FD /c
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x409 /d "NDEBUG"
@@ -69,7 +69,7 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /YX /FD /GZ /c
-# ADD CPP /nologo /W3 /Gm /GX /ZI /Od /I "..\wxWidgets\contrib\src\stc\scintilla\include\\" /I "..\wxWidgets\contrib\src\stc\scintilla\src\\" /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /FR /YX /FD /GZ /c
+# ADD CPP /nologo /W3 /Gm /GX /ZI /Od /I "..\wxWidgets\contrib\src\stc\scintilla\include\\" /I "..\wxWidgets\contrib\src\stc\scintilla\src\\" /I "." /FI"pragma.h" /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /D WINVER=0x600 /FR /YX /FD /GZ /c
 # ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x409 /d "_DEBUG"
@@ -432,7 +432,19 @@ SOURCE=.\debug_print.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\edit_panel.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\ini_file.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\mdi_windows.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\menubar.c
 # End Source File
 # Begin Source File
 
@@ -441,6 +453,10 @@ SOURCE=.\pedit_test.c
 # Begin Source File
 
 SOURCE=.\include\ScintillaWin.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=.\status_bar.c
 # End Source File
 # End Group
 # Begin Group "Header Files"

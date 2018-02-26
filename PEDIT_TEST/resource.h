@@ -4,6 +4,8 @@
 //
 #define IDD_PEDIT                       101
 #define IDD_INSTALL_DIALOG              102
+#define IDD_EDITPANE                    103
+#define IDD_MENUBAR                     104
 #define IDC_INSTALL_INFO                1000
 #define IDC_USE_LOCAL                   1001
 #define IDC_USE_APPDATA                 1002
@@ -15,7 +17,7 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        102
+#define _APS_NEXT_RESOURCE_VALUE        104
 #define _APS_NEXT_COMMAND_VALUE         40001
 #define _APS_NEXT_CONTROL_VALUE         1000
 #define _APS_NEXT_SYMED_VALUE           101
