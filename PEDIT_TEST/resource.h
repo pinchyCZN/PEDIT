@@ -3,6 +3,13 @@
 // Used by pedit.rc
 //
 #define IDD_PEDIT                       101
+#define IDD_INSTALL_DIALOG              102
+#define IDC_INSTALL_INFO                1000
+#define IDC_USE_LOCAL                   1001
+#define IDC_USE_APPDATA                 1002
+#define IDC_NO_INI                      1003
+#define IDC_TXT_LOCAL                   1004
+#define IDC_TXT_APPDATA                 1005
 
 // Next default values for new objects
 // 
