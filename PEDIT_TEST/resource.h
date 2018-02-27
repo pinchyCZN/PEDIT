@@ -4,8 +4,6 @@
 //
 #define IDD_PEDIT                       101
 #define IDD_INSTALL_DIALOG              102
-#define IDD_EDITPANE                    103
-#define IDD_MENUBAR                     104
 #define IDC_INSTALL_INFO                1000
 #define IDC_USE_LOCAL                   1001
 #define IDC_USE_APPDATA                 1002

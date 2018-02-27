@@ -1,35 +1,37 @@
 #include <windows.h>
 #include "resource.h"
+#include "anchor_system.h"
 
 extern HINSTANCE ghinstance;
 HWND hmenubar=0;
 
-BOOL CALLBACK menu_proc(HWND hwnd,UINT msg,WPARAM wparam,LPARAM lparam)
+WNDPROC menu_proc(HWND hwnd,UINT msg,WPARAM wparam,LPARAM lparam)
 {
-	return 0;
+	switch(msg){
+	}
+	return DefWindowProc(hwnd,msg,wparam,lparam);
 }
 
-int add_menubar(HWND hwnd)
+int add_menubar(HWND hparent)
 {
 	int result=FALSE;
-	RECT rect;
-	int w,h,id;
+	int id;
+	ATOM menu_class;
 	if(hmenubar)
 		return TRUE;
-	GetClientRect(hwnd,&rect);
-	w=rect.right-rect.left;
-	h=30;
+	menu_class=get_menu_panel_atom(menu_proc);
 	id=get_new_child_id();
-	hmenubar=CreateDialog(ghinstance,MAKEINTRESOURCE(IDD_MENUBAR),hwnd,menu_proc);
-	SetWindowPos(hmenubar,NULL,0,0,200,40,SW_SHOW);
-	//hmenubar=CreateWindow(MAKEINTRESOURCE(IDD_MENUBAR),TEXT("MENU"),WS_VISIBLE|WS_CHILD,
-	//	0,0,w,h,hwnd,id,ghinstance,0);
+	hmenubar=CreateWindow(menu_class,TEXT("MENU"),WS_CHILD|WS_VISIBLE,
+		0,0,0,0,hparent,id,ghinstance,NULL);
 	if(hmenubar){
+		RECT rect;
+		int w,h;
+		GetClientRect(hparent,&rect);
+		w=rect.right-rect.left;
+		h=GetSystemMetrics(SM_CYMENU);
+		SetWindowPos(hmenubar,NULL,0,0,w,h,SWP_SHOWWINDOW|SWP_NOZORDER);
+		add_pane(hparent,hmenubar,ANCHOR_LEFT|ANCHOR_RIGHT|ANCHOR_TOP,id);
 		result=TRUE;
-		id=get_new_child_id();
-		CreateWindow(("BUTTON"),"TEST",WS_VISIBLE|WS_CHILD|BS_DEFPUSHBUTTON,
-			0,0,80,20,hmenubar,id,ghinstance,0);
-		print_lasterror();
 	}
 	return result;
 }

@@ -1,58 +1,128 @@
 #include <windows.h>
+#include "anchor_system.h"
 
-extern HWND hedit_pane;
-extern HWND hstatusbar;
-extern HWND hmenubar;
+extern HINSTANCE ghinstance;
+extern HWND hpedit;
 
-#define GROUP_USE_ALL      0
-#define GROUP_FIXED_WIDTH  1
-#define GROUP_FIXED_HEIGHT 2
-
-struct MDI_PANE{
-	HWND hwnd;
-	int id;
-	RECT rect;
-};
-struct MDI_PANE *pane_list=0;
-int pane_count=0;
+struct CONTROL_ANCHOR *pane_list=0;
+unsigned int pane_count=0;
 
 static int current_child_id=1000;
 int get_new_child_id()
 {
-	int result=current_child_id;
+	int result;
+	current_child_id&=0x3FFF;
+	if(0==current_child_id)
+		current_child_id=1;
+	result=current_child_id;
 	current_child_id++;
 	return result;
 }
 
-int register_pane(HWND hwnd,int type)
+int add_pane(HWND hparent,HWND hwnd,int anchor,int id)
 {
 	int result=FALSE;
-	struct MDI_PANE *tmp;
+	struct CONTROL_ANCHOR tmp={0};
+	void *ptr;
 	pane_count++;
-	tmp=realloc(pane_list,sizeof(struct MDI_PANE)*pane_count);
-	if(tmp){
-		pane_list=tmp;
-
+	ptr=realloc(pane_list,sizeof(struct CONTROL_ANCHOR)*pane_count);
+	if(ptr){
+		int index=pane_count-1;
+		pane_list=ptr;
+		pane_list=(struct CONTROL_ANCHOR *)ptr;
+		tmp.ctrl_id=id;
+		tmp.anchor_mask=anchor;
+		GetClientRect(hparent,&tmp.rect_parent);
+		GetWindowRect(hwnd,&tmp.rect_ctrl);
+		MapWindowPoints(NULL,hparent,(PPOINT)&tmp.rect_ctrl,2);
+		tmp.hwnd=hwnd;
+		tmp.initialized=1;
+		pane_list[index]=tmp;
 	}
 	return result;
 }
-int get_main_rect(HWND hwnd,RECT *rect)
+int get_max_edit_area(RECT *rect)
 {
 	int result=FALSE;
+	unsigned int i;
+	if(0==pane_list)
+		return result;
+	GetClientRect(hpedit,rect);
+	result=TRUE;
+	for(i=0;i<pane_count;i++){
+		RECT *tmp;
+		struct CONTROL_ANCHOR *ca;
+		int mask;
+		ca=&pane_list[i];
+		if(!IsWindowVisible(ca->hwnd))
+			continue;
+		mask=ca->anchor_mask;
+		tmp=&ca->rect_ctrl;
+		if(mask&(ANCHOR_LEFT|ANCHOR_RIGHT)){
+			if(mask&ANCHOR_TOP){
+				if(tmp->bottom>rect->top)
+					rect->top=tmp->bottom;
+			}else if(mask&ANCHOR_BOTTOM){
+				if(tmp->top<rect->bottom)
+					rect->bottom=tmp->top;
+			}
+		}else if(mask&(ANCHOR_TOP|ANCHOR_BOTTOM)){
+			if(mask&ANCHOR_LEFT){
+				if(tmp->right>rect->left)
+					rect->left=tmp->right;
+			}else if(mask&ANCHOR_RIGHT){
+				if(tmp->left<rect->right)
+					rect->right=tmp->left;
+			}
+		}
+	}
 	return result;
-
 }
 int window_move(HWND hwnd)
 {
-	int result=FALSE;
-	RECT rect;
-	int x,y;
-	GetClientRect(hwnd,&rect);
-	MapWindowPoints(hwnd,NULL,(LPPOINT)&rect,2);
-	x=rect.left;
-	y=rect.top;
-	if(hedit_pane){
-		result=SetWindowPos(hedit_pane,NULL,x,y,0,0,SWP_NOSIZE);
+	anchor_resize(hwnd,pane_list,pane_count);
+	return 0;
+}
+
+int get_edit_panel_atom(WNDPROC *wndproc)
+{
+	static ATOM edit_class=0;
+	if(0==edit_class){
+		WNDCLASS wclass={0};
+		wclass.hInstance=ghinstance;
+		wclass.hCursor=NULL;
+		wclass.hbrBackground=(HBRUSH)COLOR_WINDOW;
+		wclass.lpszClassName=TEXT("EDIT_PANEL");
+		wclass.lpfnWndProc=(WNDPROC)wndproc;
+		edit_class=RegisterClass(&wclass);
 	}
-	return result;
+	return edit_class;
+}
+int get_menu_panel_atom(WNDPROC *wndproc)
+{
+	static ATOM menu_class=0;
+	if(0==menu_class){
+		WNDCLASS wclass={0};
+		wclass.hInstance=ghinstance;
+		wclass.hCursor=NULL;
+		wclass.hbrBackground=(HBRUSH)COLOR_WINDOW;
+		wclass.lpszClassName=TEXT("MENU_PANEL");
+		wclass.lpfnWndProc=(WNDPROC)wndproc;
+		menu_class=RegisterClass(&wclass);
+	}
+	return menu_class;
+}
+int get_project_panel_atom(WNDPROC *wndproc)
+{
+	static ATOM project_class=0;
+	if(0==project_class){
+		WNDCLASS wclass={0};
+		wclass.hInstance=ghinstance;
+		wclass.hCursor=NULL;
+		wclass.hbrBackground=(HBRUSH)COLOR_WINDOW;
+		wclass.lpszClassName=TEXT("PROJECT_PANEL");
+		wclass.lpfnWndProc=(WNDPROC)wndproc;
+		project_class=RegisterClass(&wclass);
+	}
+	return project_class;
 }

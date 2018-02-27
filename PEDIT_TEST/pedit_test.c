@@ -4,8 +4,8 @@
 #include "resource.h"
 
 HWND hpedit=0;
-HWND hscint=0;
 HINSTANCE ghinstance=0;
+
 int setup_debug(HWND hwnd)
 {
 	RECT rect;
@@ -21,27 +21,37 @@ int setup_panels(HWND hwnd)
 	int result=FALSE;
 	add_statusbar(hwnd);
 	add_menubar(hwnd);
-	//add_edit_pane(hwnd);
-	//add_edit();
+	add_edit_pane(hwnd);
+	add_edit();
 	/*
 	hscint=CreateWindowEx(0,TEXT("Scintilla"),TEXT("Main edit"),WS_CHILD|WS_VISIBLE|WS_TABSTOP|WS_CLIPCHILDREN,
 				0,0,100,100,hwnd,0,ghinstance,0);
 */
 	return result;
 }
-BOOL CALLBACK DialogProc(HWND hwnd,UINT msg,WPARAM wparam,LPARAM lparam)
+LRESULT CALLBACK DialogProc(HWND hwnd,UINT msg,WPARAM wparam,LPARAM lparam)
 {
+//	if(!(msg==WM_SETCURSOR || msg==WM_NCHITTEST || msg==WM_MOUSEFIRST || msg==WM_NCMOUSEMOVE))
+//		print_msg(msg,wparam,lparam);
 
 	switch(msg){
 	case WM_INITDIALOG:
-		{
-			setup_debug(hwnd);
-			setup_panels(hwnd);
-		}
 		break;
+	case WM_SIZE:
+	case WM_SIZING:
 	case WM_MOVE:
 	case WM_MOVING:
 		window_move(hwnd);
+		break;
+	case WM_COMMAND:
+		{
+			int id=LOWORD(wparam);
+			switch(id){
+			case IDCANCEL:
+				PostMessage(hwnd,WM_CLOSE,0,0);
+				break;
+			}
+		}
 		break;
 	case WM_CLOSE:
 		DestroyWindow(hwnd);
@@ -61,6 +71,7 @@ int WINAPI WinMain(HINSTANCE hinstance,HINSTANCE hprevinstance,LPSTR cmdline,int
 
 	ghinstance=hinstance;
 	Scintilla_RegisterClasses(hinstance);
+
 	ctrls.dwSize=sizeof(ctrls);
 	ctrls.dwICC=ICC_LISTVIEW_CLASSES|ICC_TREEVIEW_CLASSES|ICC_BAR_CLASSES|ICC_TAB_CLASSES|ICC_PROGRESS_CLASS|ICC_HOTKEY_CLASS;
 	InitCommonControlsEx(&ctrls);
@@ -71,6 +82,8 @@ int WINAPI WinMain(HINSTANCE hinstance,HINSTANCE hprevinstance,LPSTR cmdline,int
 		return 0;
 	}
 	ShowWindow(hpedit,SW_SHOW);
+	setup_debug(hpedit);
+	setup_panels(hpedit);
 	while ((ret=GetMessage(&msg,NULL,0,0))!=0){
 		if (ret==-1){
 			break;

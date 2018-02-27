@@ -1,25 +1,8 @@
 #include <windows.h>
+#include "anchor_system.h"
 #include "resource.h"
 
-#define ANCHOR_LEFT 1
-#define ANCHOR_RIGHT 2
-#define ANCHOR_TOP 4
-#define ANCHOR_BOTTOM 8
-#define ANCHOR_HCENTER 16
-
-struct CONTROL_ANCHOR{
-	int ctrl_id;
-	int anchor_mask;
-	RECT rect_ctrl,rect_parent;
-	int initialized;
-};
-
-struct WIN_REL_POS{
-	WINDOWPLACEMENT parent,win;
-	int initialized;
-};
-
-int anchor_init(HWND hparent,struct CONTROL_ANCHOR *clist,int clist_len)
+int anchor_init_by_id(HWND hparent,struct CONTROL_ANCHOR *clist,int clist_len)
 {
 	int i;
 	RECT rparent={0};
@@ -33,26 +16,27 @@ int anchor_init(HWND hparent,struct CONTROL_ANCHOR *clist,int clist_len)
 		if(hctrl){
 			RECT rctrl={0};
 			GetWindowRect(hctrl,&rctrl);
-			MapWindowPoints(NULL,hparent,(LPPOINT)&rctrl,2);
+			MapWindowPoints(NULL,hparent,(PPOINT)&rctrl,2);
 			anchor->rect_ctrl=rctrl;
+			anchor->hwnd=hctrl;
 		}
 		anchor->initialized=1;
 	}
 	return 0;
 }
 
-int anchor_resize(HWND hparent,struct CONTROL_ANCHOR *clist,int clist_len)
+int anchor_resize(HWND hparent,struct CONTROL_ANCHOR *clist,int clist_count)
 {
 	int i;
 	RECT rparent={0};
 	GetClientRect(hparent,&rparent);
-	for(i=0;i<clist_len;i++){
+	for(i=0;i<clist_count;i++){
 		HWND hctrl;
 		struct CONTROL_ANCHOR *anchor;
 		anchor=&clist[i];
 		if(!anchor->initialized)
 			continue;
-		hctrl=GetDlgItem(hparent,anchor->ctrl_id);
+		hctrl=anchor->hwnd;
 		if(hctrl){
 			int x=0,y=0,cx=0,cy=0,delta;
 			int flags=0;
@@ -380,13 +364,13 @@ int grippy_move(HWND hwnd,HWND grippy)
 }
 
 struct CONTROL_ANCHOR ini_win_anchor[]={
-	{IDC_TXT_LOCAL,ANCHOR_LEFT|ANCHOR_RIGHT|ANCHOR_TOP,0,0,0},
-	{IDC_TXT_APPDATA,ANCHOR_LEFT|ANCHOR_RIGHT|ANCHOR_TOP,0,0,0},
-	{IDC_INSTALL_INFO,ANCHOR_LEFT|ANCHOR_RIGHT|ANCHOR_TOP,0,0,0}
+	{IDC_TXT_LOCAL,ANCHOR_LEFT|ANCHOR_RIGHT|ANCHOR_TOP,0,0,0,0,0},
+	{IDC_TXT_APPDATA,ANCHOR_LEFT|ANCHOR_RIGHT|ANCHOR_TOP,0,0,0,0,0},
+	{IDC_INSTALL_INFO,ANCHOR_LEFT|ANCHOR_RIGHT|ANCHOR_TOP,0,0,0,0,0}
 };
 int init_ini_win_anchor(HWND hwnd)
 {
-	return anchor_init(hwnd,ini_win_anchor,sizeof(ini_win_anchor)/sizeof(struct CONTROL_ANCHOR));
+	return anchor_init_by_id(hwnd,ini_win_anchor,sizeof(ini_win_anchor)/sizeof(struct CONTROL_ANCHOR));
 }
 int resize_ini_win(HWND hwnd)
 {
