@@ -34,6 +34,9 @@ WNDPROC wproc_edit_pane(HWND hwnd,UINT msg,WPARAM wparam,LPARAM lparam)
 				if(scn->ch==VK_ESCAPE)
 					PostQuitMessage(0);
 				break;
+			case SCN_UPDATEUI:
+				highlight_match(hwnd);
+				break;
 			}
 		}
 		break;
@@ -95,8 +98,6 @@ int setup_scint(HWND hscint)
 	SendMessage(hscint,SCI_STYLECLEARALL,0,0);
 	SendMessage(hscint,SCI_SETLEXER,SCLEX_NULL,0);
 	SendMessage(hscint,SCI_SETSTYLEBITS,8,0);
-
-	//SendMessage(hscint,SCI_SETSTYLING,0xFFFFFFFF,STYLE_DEFAULT);
 	return 0;
 }
 int add_edit()
