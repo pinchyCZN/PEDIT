@@ -500,18 +500,18 @@ int get_key_str(unsigned int key,char *str)
 		sprintf(str,"%s",virtual_keys[key]);
 	return TRUE;
 }
-void print_msg(int msg,int lparam,int wparam,int hwnd)
+void print_msg(int msg,int wparam,int lparam,int hwnd)
 {
 	int i;
 	DWORD time;
 	time=GetTickCount();
 	for(i=0;i<sizeof(wm_names)/sizeof(NAME);i++){
 		if(wm_names[i].val==msg){
-			printf("%-20s lparam=%08X wparam=%08X %08X x=%3i y=%3i\n",wm_names[i].name,lparam,wparam,hwnd,LOWORD(lparam),HIWORD(lparam));
+			printf("%-20s wparam=%08X lparam=%08X %08X x=%3i y=%3i\n",wm_names[i].name,wparam,lparam,hwnd,LOWORD(lparam),HIWORD(lparam));
 			return;
 		}
 	}
-	printf("msg=%08X lparam=%08X wparam=%08X %08X x=%3i y=%3i\n",msg,lparam,wparam,hwnd,LOWORD(lparam),HIWORD(lparam));
+	printf("msg=%08X wparam=%08X lparam=%08X %08X x=%3i y=%3i\n",msg,wparam,lparam,hwnd,LOWORD(lparam),HIWORD(lparam));
 }
 static format_msg(int error,char *prefix)
 {

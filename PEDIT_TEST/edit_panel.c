@@ -1,5 +1,6 @@
 #include <windows.h>
 #include "scintilla.h"
+#include "scilexer.h"
 #include "resource.h"
 #include "anchor_system.h"
 extern HINSTANCE ghinstance;
@@ -25,7 +26,15 @@ WNDPROC wproc_edit_pane(HWND hwnd,UINT msg,WPARAM wparam,LPARAM lparam)
 	switch(msg){
 	case WM_NOTIFY:
 		{
-			//struct Sci_Notif
+			LPNMHDR nmhdr=(LPNMHDR)lparam;
+			struct SCNotification *scn=(struct SCNotification *)lparam;
+			printf("code=%08X %i\n",nmhdr->code,nmhdr->code);
+			switch(nmhdr->code){
+			case SCN_KEY:
+				if(scn->ch==VK_ESCAPE)
+					PostQuitMessage(0);
+				break;
+			}
 		}
 		break;
 	}
@@ -59,13 +68,35 @@ int add_edit_pane(HWND hparent)
 	return result;
 }
 
+DWORD getRGB(COLORREF c)
+{
+	return (GetRValue(c)<<16)|(GetGValue(c)<<8)|GetBValue(c);
+}
 int setup_scint(HWND hscint)
 {
 	COLORREF fg,bg;
-	fg=GetSystemMetrics(COLOR_WINDOWTEXT);
-	bg=GetSystemMetrics(COLOR_WINDOW);
+	HFONT hfont;
+	fg=GetSysColor(COLOR_WINDOWTEXT);
+	bg=GetSysColor(COLOR_WINDOW);
+	fg=getRGB(fg);
+	bg=getRGB(bg);
+	SendMessage(hscint,SCI_SETCARETWIDTH,2,0);
+	SendMessage(hscint,SCI_SETCARETPERIOD,600,0);
+	SendMessage(hscint,SCI_SETCARETLINEVISIBLE,1,0);
+	SendMessage(hscint,SCI_SETCARETLINEBACK,0x3F1F00,0);
+	SendMessage(hscint,SCI_SETCARETFORE,0xFFFFFF,0);
+	
 	SendMessage(hscint,SCI_STYLESETBACK,STYLE_DEFAULT,bg);
 	SendMessage(hscint,SCI_STYLESETFORE,STYLE_DEFAULT,fg);
+	SendMessage(hscint,SCI_STYLESETFONT,STYLE_DEFAULT,"Fixedsys");
+	SendMessage(hscint,SCI_STYLESETBOLD,STYLE_DEFAULT,0);
+	SendMessage(hscint,SCI_STYLESETITALIC,STYLE_DEFAULT,0);
+	SendMessage(hscint,SCI_STYLESETUNDERLINE,STYLE_DEFAULT,0);
+	SendMessage(hscint,SCI_STYLECLEARALL,0,0);
+	SendMessage(hscint,SCI_SETLEXER,SCLEX_NULL,0);
+	SendMessage(hscint,SCI_SETSTYLEBITS,8,0);
+
+	//SendMessage(hscint,SCI_SETSTYLING,0xFFFFFFFF,STYLE_DEFAULT);
 	return 0;
 }
 int add_edit()
