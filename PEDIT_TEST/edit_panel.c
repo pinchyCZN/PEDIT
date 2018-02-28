@@ -35,7 +35,7 @@ WNDPROC wproc_edit_pane(HWND hwnd,UINT msg,WPARAM wparam,LPARAM lparam)
 					PostQuitMessage(0);
 				break;
 			case SCN_UPDATEUI:
-				highlight_match(hwnd);
+				highlight_match(nmhdr->hwndFrom);
 				break;
 			}
 		}
