@@ -137,7 +137,6 @@ int add_edit(HWND *hedit)
 	MapWindowPoints(NULL,hedit_pane,(PPOINT)&rect,2);
 	w=rect.right-rect.left;
 	h=rect.bottom-rect.top;
-	h/=2;
 	x=rect.left;
 	y=rect.top;
 	SetWindowPos(hwnd,NULL,x,y,w,h,SWP_NOZORDER|SWP_SHOWWINDOW);
