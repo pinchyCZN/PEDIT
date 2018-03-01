@@ -19,10 +19,30 @@ int setup_debug(HWND hwnd)
 int setup_panels(HWND hwnd)
 {
 	int result=FALSE;
+	HWND hedit=0;
 	add_statusbar(hwnd);
 	add_menubar(hwnd);
 	add_edit_pane(hwnd);
-	add_edit();
+	add_edit(&hedit);
+	if(hedit){
+		char *tmp=malloc(0x100000);
+		int i;
+		char *p=tmp;
+		SetFocus(hedit);
+		memset(tmp,0,0x100000);
+		for(i=0;i<20;i++){
+			if(i==10){
+				strcpy(p,"1234567890\r\n");
+				p+=sizeof("1234567890\r\n")-1;
+			}
+			else{
+				strcpy(p,"123\r\n");
+				p+=(sizeof("123\r\n")-1);
+			}
+		}
+		SendMessage(hedit,SCI_SETTEXT,0,tmp);
+	}
+
 	/*
 	hscint=CreateWindowEx(0,TEXT("Scintilla"),TEXT("Main edit"),WS_CHILD|WS_VISIBLE|WS_TABSTOP|WS_CLIPCHILDREN,
 				0,0,100,100,hwnd,0,ghinstance,0);
@@ -81,8 +101,8 @@ int WINAPI WinMain(HINSTANCE hinstance,HINSTANCE hprevinstance,LPSTR cmdline,int
 		MessageBox(0,TEXT("Unable to create Window"),TEXT("ERROR"),MB_OK|MB_SYSTEMMODAL);
 		return 0;
 	}
-	ShowWindow(hpedit,SW_SHOW);
 	setup_debug(hpedit);
+	ShowWindow(hpedit,SW_SHOW);
 	setup_panels(hpedit);
 	while ((ret=GetMessage(&msg,NULL,0,0))!=0){
 		if (ret==-1){
