@@ -18,13 +18,41 @@ unsigned int edit_count=0;
 
 static LRESULT (CALLBACK *old_wproc_edit)(HWND,UINT,WPARAM,LPARAM)=0;
 
+int resize_edit_list(HWND hwnd)
+{
+	RECT rect;
+	int w,h;
+	unsigned int i;
+	GetWindowRect(hwnd,&rect);
+	w=rect.right-rect.top;
+	h=rect.bottom-rect.top;
+	for(i=0;i<edit_count;i++){
+		struct EDIT_CONTROL *ec;
+		ec=&edit_list[i];
+		SetWindowPos(ec->hscint,NULL,0,0,w,h,SWP_NOZORDER|SWP_SHOWWINDOW);
+	}
+	return edit_count;
+}
+
 WNDPROC wproc_edit_pane(HWND hwnd,UINT msg,WPARAM wparam,LPARAM lparam)
 {
-	if(!(msg==WM_SETCURSOR || msg==WM_NCHITTEST || msg==WM_MOUSEFIRST || msg==WM_NCMOUSEMOVE
-		))//|| msg==WM_NOTIFY))
+	//if(!(msg==WM_SETCURSOR || msg==WM_NCHITTEST || msg==WM_MOUSEFIRST || msg==WM_NCMOUSEMOVE
+	//	))//|| msg==WM_NOTIFY))
 		print_msg(msg,wparam,lparam);
-
 	switch(msg){
+	case WM_SIZE:
+		{
+			resize_edit_list(hwnd);
+		}
+		break;
+	case WM_LBUTTONUP:
+		{
+			static int show=FALSE;
+			show_menu(show);
+			show=!show;
+			adjust_for_menu();
+		}
+		break;
 	case WM_NOTIFY:
 		{
 			LPNMHDR nmhdr=(LPNMHDR)lparam;
@@ -51,8 +79,19 @@ WNDPROC scint_subclass(HWND hwnd,UINT msg,WPARAM wparam,LPARAM lparam)
 	case WM_KEYDOWN:
 		{
 			int key=wparam;
-			if(key==VK_ESCAPE)
+			switch(key){
+			case VK_ESCAPE:
 				PostQuitMessage(0);
+				break;
+			case VK_F1:
+				{
+					static int show=FALSE;
+					show_menu(show);
+					show=!show;
+					adjust_for_menu();
+				}
+				break;
+			}
 		}
 		break;
 	}
@@ -76,6 +115,8 @@ int add_edit_pane(HWND hparent)
 		y=rect.top;
 		w=rect.right-rect.left;
 		h=rect.bottom-rect.top;
+//		w/=2;
+//		h/=2;
 
 		SetWindowPos(hedit_pane,NULL,x,y,w,h,SWP_NOZORDER|SWP_SHOWWINDOW);
 		id=get_new_child_id();
@@ -101,7 +142,7 @@ int setup_scint(HWND hscint)
 	SendMessage(hscint,SCI_SETCARETLINEVISIBLE,1,0);
 	SendMessage(hscint,SCI_SETCARETLINEBACK,0x3F1F00,0);
 	SendMessage(hscint,SCI_SETCARETFORE,0xFFFFFF,0);
-	SendMessage(hscint,SCI_SETVIRTUALSPACEOPTIONS,SCVS_RECTANGULARSELECTION,0);
+	SendMessage(hscint,SCI_SETVIRTUALSPACEOPTIONS,SCVS_RECTANGULARSELECTION,0); //rectangular selection
 	
 	SendMessage(hscint,SCI_STYLESETBACK,STYLE_DEFAULT,bg);
 	SendMessage(hscint,SCI_STYLESETFORE,STYLE_DEFAULT,fg);
@@ -109,7 +150,7 @@ int setup_scint(HWND hscint)
 	SendMessage(hscint,SCI_STYLESETBOLD,STYLE_DEFAULT,0);
 	SendMessage(hscint,SCI_STYLESETITALIC,STYLE_DEFAULT,0);
 	SendMessage(hscint,SCI_STYLESETUNDERLINE,STYLE_DEFAULT,0);
-	SendMessage(hscint,SCI_STYLECLEARALL,0,0);
+	SendMessage(hscint,SCI_STYLECLEARALL,0,0); //required for colors
 	SendMessage(hscint,SCI_SETLEXER,SCLEX_NULL,0);
 	SendMessage(hscint,SCI_SETSTYLEBITS,8,0);
 	setup_highlight(hscint);

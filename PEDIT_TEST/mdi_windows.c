@@ -45,10 +45,10 @@ int get_max_edit_area(RECT *rect)
 {
 	int result=FALSE;
 	unsigned int i;
-	if(0==pane_list)
-		return result;
 	GetClientRect(hpedit,rect);
 	result=TRUE;
+	if(0==pane_list)
+		return result;
 	for(i=0;i<pane_count;i++){
 		RECT *tmp;
 		struct CONTROL_ANCHOR *ca;
@@ -91,7 +91,7 @@ int get_edit_panel_atom(WNDPROC *wndproc)
 		WNDCLASS wclass={0};
 		wclass.hInstance=ghinstance;
 		wclass.hCursor=NULL;
-		wclass.hbrBackground=(HBRUSH)COLOR_WINDOW;
+		wclass.hbrBackground=(HBRUSH)(COLOR_SCROLLBAR+1); //(HBRUSH)(COLOR_BTNFACE+1);
 		wclass.lpszClassName=TEXT("EDIT_PANEL");
 		wclass.lpfnWndProc=(WNDPROC)wndproc;
 		edit_class=RegisterClass(&wclass);
@@ -105,7 +105,7 @@ int get_menu_panel_atom(WNDPROC *wndproc)
 		WNDCLASS wclass={0};
 		wclass.hInstance=ghinstance;
 		wclass.hCursor=NULL;
-		wclass.hbrBackground=(HBRUSH)COLOR_WINDOW;
+		wclass.hbrBackground=(HBRUSH)(COLOR_BTNFACE+1);
 		wclass.lpszClassName=TEXT("MENU_PANEL");
 		wclass.lpfnWndProc=(WNDPROC)wndproc;
 		menu_class=RegisterClass(&wclass);
@@ -119,10 +119,45 @@ int get_project_panel_atom(WNDPROC *wndproc)
 		WNDCLASS wclass={0};
 		wclass.hInstance=ghinstance;
 		wclass.hCursor=NULL;
-		wclass.hbrBackground=(HBRUSH)COLOR_WINDOW;
+		wclass.hbrBackground=(HBRUSH)(COLOR_BTNFACE+1);
 		wclass.lpszClassName=TEXT("PROJECT_PANEL");
 		wclass.lpfnWndProc=(WNDPROC)wndproc;
 		project_class=RegisterClass(&wclass);
 	}
 	return project_class;
+}
+int get_menu_height(HWND hwnd)
+{
+	int height=0;
+	MENUBARINFO mbi={0};
+	mbi.cbSize=sizeof(mbi);
+	if(GetMenuBarInfo(hwnd,OBJID_MENU,0,&mbi)){
+		height=mbi.rcBar.bottom-mbi.rcBar.top;
+	}
+	return height;
+}
+int adjust_for_menu()
+{
+	int result=0;
+	unsigned int i;
+	RECT rparent;
+	int height;
+	GetClientRect(hpedit,&rparent);
+	height=rparent.bottom-rparent.top;
+	printf("i=%i\n",height);
+	for(i=0;i<pane_count;i++){
+		int delta;
+		struct CONTROL_ANCHOR *ca;
+		RECT *rparent,*rect;
+		int h;
+		ca=&pane_list[i];
+		rparent=&ca->rect_parent;
+		h=rparent->bottom-rparent->top;
+		delta=height-h;
+		rect=&ca->rect_ctrl;
+		//rect->top+=delta;
+		//rect->bottom+=delta;
+		result=delta;
+	}
+	return result;
 }

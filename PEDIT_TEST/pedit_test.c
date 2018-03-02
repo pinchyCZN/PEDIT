@@ -15,15 +15,15 @@ int setup_debug(HWND hwnd)
 	move_console(0,rect.bottom);
 	return 0;
 }
-//int setup_
+
 int setup_panels(HWND hwnd)
 {
 	int result=FALSE;
 	HWND hedit=0;
 	add_statusbar(hwnd);
-	add_menubar(hwnd);
 	add_edit_pane(hwnd);
 	add_edit(&hedit);
+	add_menubar(hwnd);
 	if(hedit){
 		char *tmp=malloc(0x100000);
 		int i;

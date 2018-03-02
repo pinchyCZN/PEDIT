@@ -3,35 +3,52 @@
 #include "anchor_system.h"
 
 extern HINSTANCE ghinstance;
+extern HWND hpedit;
 HWND hmenubar=0;
+HMENU hmenu=0;
+
 
 WNDPROC menu_proc(HWND hwnd,UINT msg,WPARAM wparam,LPARAM lparam)
 {
+	print_msg(msg,wparam,lparam);
 	switch(msg){
+	case WM_SETCURSOR:
+		{
+			HCURSOR harrow;
+			harrow=LoadCursor(NULL,IDC_ARROW);
+			if(harrow)
+				SetCursor(harrow);
+		}
+		break;
 	}
 	return DefWindowProc(hwnd,msg,wparam,lparam);
 }
 
+int setup_menubar(HWND hbar)
+{
+	int result=FALSE;
+	RECT rect;
+	int id,w,h;
+	GetClientRect(hbar,&rect);
+	h=rect.bottom-rect.top;
+	return result;
+}
 int add_menubar(HWND hparent)
 {
 	int result=FALSE;
-	int id;
-	ATOM menu_class;
-	if(hmenubar)
+	if(hmenu)
 		return TRUE;
-	menu_class=get_menu_panel_atom(menu_proc);
-	id=get_new_child_id();
-	hmenubar=CreateWindow(menu_class,TEXT("MENU"),WS_CHILD|WS_VISIBLE,
-		0,0,0,0,hparent,id,ghinstance,NULL);
-	if(hmenubar){
+	hmenu=LoadMenu(ghinstance,MAKEINTRESOURCE(IDR_MAINMENU));
+	if(hmenu){
 		RECT rect;
 		int w,h;
-		GetClientRect(hparent,&rect);
-		w=rect.right-rect.left;
-		h=GetSystemMetrics(SM_CYMENU);
-		SetWindowPos(hmenubar,NULL,0,0,w,h,SWP_SHOWWINDOW|SWP_NOZORDER);
-		add_pane(hparent,hmenubar,ANCHOR_LEFT|ANCHOR_RIGHT|ANCHOR_TOP,id);
+		SetMenu(hparent,hmenu);
+		adjust_for_menu();
 		result=TRUE;
 	}
 	return result;
+}
+int show_menu(int show)
+{
+	return SetMenu(hpedit,show?hmenu:NULL);
 }

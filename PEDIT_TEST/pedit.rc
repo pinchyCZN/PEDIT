@@ -77,6 +77,30 @@ BEGIN
     LTEXT           "Settings will not be saved",IDC_STATIC,61,78,81,8
 END
 
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Menu
+//
+
+IDR_MAINMENU MENU DISCARDABLE 
+BEGIN
+    POPUP "&File"
+    BEGIN
+        MENUITEM "&Open",                       IDM_FILEOPEN
+        MENUITEM "&Close",                      IDM_FILECLOSE
+        MENUITEM "&Save",                       IDM_FILESAVE
+        MENUITEM "Save file &as",               IDM_FILESAVEAS
+        MENUITEM "&Reload",                     IDM_FILERELOAD
+        MENUITEM SEPARATOR
+        MENUITEM "E&xit",                       IDM_EXIT
+    END
+    POPUP "&Options"
+    BEGIN
+        MENUITEM "&Style colors",               IDM_STYLECOLORS
+    END
+END
+
 #endif    // English (U.S.) resources
 /////////////////////////////////////////////////////////////////////////////
 
