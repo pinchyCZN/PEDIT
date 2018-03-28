@@ -41,6 +41,36 @@ int add_pane(HWND hparent,HWND hwnd,int anchor,int id)
 	}
 	return result;
 }
+int add_default_pane(HWND hparent)
+{
+	int result=FALSE;
+	int id;
+	ATOM panel_class;
+	id=get_new_child_id();
+	panel_class=get_generic_panel_atom();
+	/*
+	hedit_pane=CreateWindow(edit_class,TEXT("EDIT_PANEL"),WS_CHILD|WS_VISIBLE,
+			0,0,0,0,hparent,id,ghinstance,0);
+	if(hedit_pane){
+		RECT rect={0};
+		int w,h,x,y,id;
+		//old_wproc_edit=SetWindowLong(hedit_pane,GWL_WNDPROC,(LONG)wproc_edit_pane);
+		get_max_edit_area(&rect);
+		x=rect.left;
+		y=rect.top;
+		w=rect.right-rect.left;
+		h=rect.bottom-rect.top;
+//		w/=2;
+//		h/=2;
+
+		SetWindowPos(hedit_pane,NULL,x,y,w,h,SWP_NOZORDER|SWP_SHOWWINDOW);
+		id=get_new_child_id();
+		add_pane(hparent,hedit_pane,ANCHOR_LEFT|ANCHOR_RIGHT|ANCHOR_TOP|ANCHOR_BOTTOM,id);
+		result=TRUE;
+	}
+*/
+	return result;
+}
 int get_max_edit_area(RECT *rect)
 {
 	int result=FALSE;
@@ -84,47 +114,86 @@ int window_move(HWND hwnd)
 	return 0;
 }
 
+WNDPROC panel_wndproc(HWND hwnd,UINT msg,WPARAM wparam,LPARAM lparam)
+{
+	switch(msg){
+	case WM_SIZE:
+		{
+			resize_edit_list(hwnd);
+		}
+		break;
+	case WM_LBUTTONUP:
+		{
+			static int show=FALSE;
+			show_menu(show);
+			show=!show;
+			adjust_for_menu();
+		}
+		break;
+	case WM_PAINT:
+		{
+			RECT rect,ro;
+			PAINTSTRUCT ps={0};
+			HDC hdc=BeginPaint(hwnd,&ps);
+			if(!hdc)
+				break;
+			GetClientRect(hwnd,&rect);
+			ro=rect;
+			FillRect(hdc,&rect,(HBRUSH)(COLOR_BTNFACE+1));
+			rect.left+=10;
+			rect.top+=4;
+			rect.right-=20;
+			if(rect.right>0){
+				rect.bottom=rect.top+3;
+				DrawEdge(hdc,&rect,BDR_RAISEDINNER,BF_RECT);
+				rect.top+=4;
+				rect.bottom+=4;
+				DrawEdge(hdc,&rect,BDR_RAISEDINNER,BF_RECT);
+			}
+			EndPaint(hwnd,&ps);
+		}
+		break;
+	}
+	return DefWindowProc(hwnd,msg,wparam,lparam);
+}
+
+int get_panel_atom(const char *name,WNDPROC *wndproc)
+{
+	ATOM result;
+	WNDCLASSA wclass={0};
+	wclass.hInstance=ghinstance;
+	wclass.hCursor=NULL;
+	wclass.hbrBackground=(HBRUSH)(COLOR_BACKGROUND+1); //(HBRUSH)(COLOR_BTNFACE+1);
+	wclass.lpszClassName=name;
+	wclass.lpfnWndProc=(WNDPROC)wndproc;
+	result=RegisterClass(&wclass);
+	return result;
+}
+
+int get_generic_panel_atom()
+{
+	static ATOM panel_class=0;
+	if(0==panel_class){
+		get_panel_atom("PANEL",panel_wndproc);
+	}
+	return panel_class;
+}
+
 int get_edit_panel_atom(WNDPROC *wndproc)
 {
 	static ATOM edit_class=0;
 	if(0==edit_class){
-		WNDCLASS wclass={0};
-		wclass.hInstance=ghinstance;
-		wclass.hCursor=NULL;
-		wclass.hbrBackground=(HBRUSH)(COLOR_SCROLLBAR+1); //(HBRUSH)(COLOR_BTNFACE+1);
-		wclass.lpszClassName=TEXT("EDIT_PANEL");
-		wclass.lpfnWndProc=(WNDPROC)wndproc;
-		edit_class=RegisterClass(&wclass);
+		edit_class=get_panel_atom("EDIT_PANEL",wndproc);
 	}
 	return edit_class;
 }
-int get_menu_panel_atom(WNDPROC *wndproc)
+int get_console_panel_atom(WNDPROC *wndproc)
 {
-	static ATOM menu_class=0;
-	if(0==menu_class){
-		WNDCLASS wclass={0};
-		wclass.hInstance=ghinstance;
-		wclass.hCursor=NULL;
-		wclass.hbrBackground=(HBRUSH)(COLOR_BTNFACE+1);
-		wclass.lpszClassName=TEXT("MENU_PANEL");
-		wclass.lpfnWndProc=(WNDPROC)wndproc;
-		menu_class=RegisterClass(&wclass);
+	static ATOM console_class=0;
+	if(0==console_class){
+		console_class=get_panel_atom("CONSOLE_PANEL",wndproc);
 	}
-	return menu_class;
-}
-int get_project_panel_atom(WNDPROC *wndproc)
-{
-	static ATOM project_class=0;
-	if(0==project_class){
-		WNDCLASS wclass={0};
-		wclass.hInstance=ghinstance;
-		wclass.hCursor=NULL;
-		wclass.hbrBackground=(HBRUSH)(COLOR_BTNFACE+1);
-		wclass.lpszClassName=TEXT("PROJECT_PANEL");
-		wclass.lpfnWndProc=(WNDPROC)wndproc;
-		project_class=RegisterClass(&wclass);
-	}
-	return project_class;
+	return console_class;
 }
 int get_menu_height(HWND hwnd)
 {

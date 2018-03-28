@@ -26,10 +26,13 @@ int resize_edit_list(HWND hwnd)
 	GetWindowRect(hwnd,&rect);
 	w=rect.right-rect.top;
 	h=rect.bottom-rect.top;
+	w+=10;
 	for(i=0;i<edit_count;i++){
+		int x,y;
 		struct EDIT_CONTROL *ec;
 		ec=&edit_list[i];
-		SetWindowPos(ec->hscint,NULL,0,0,w,h,SWP_NOZORDER|SWP_SHOWWINDOW);
+		x=y=0;
+		SetWindowPos(ec->hscint,NULL,0,y,w,h,SWP_NOZORDER|SWP_SHOWWINDOW);
 	}
 	return edit_count;
 }
@@ -51,6 +54,29 @@ WNDPROC wproc_edit_pane(HWND hwnd,UINT msg,WPARAM wparam,LPARAM lparam)
 			show_menu(show);
 			show=!show;
 			adjust_for_menu();
+		}
+		break;
+	case WM_PAINT:
+		{
+			RECT rect,ro;
+			PAINTSTRUCT ps={0};
+			HDC hdc=BeginPaint(hwnd,&ps);
+			if(!hdc)
+				break;
+			GetClientRect(hwnd,&rect);
+			ro=rect;
+			FillRect(hdc,&rect,(HBRUSH)(COLOR_BTNFACE+1));
+			rect.left+=10;
+			rect.top+=4;
+			rect.right-=20;
+			if(rect.right>0){
+				rect.bottom=rect.top+3;
+				DrawEdge(hdc,&rect,BDR_RAISEDINNER,BF_RECT);
+				rect.top+=4;
+				rect.bottom+=4;
+				DrawEdge(hdc,&rect,BDR_RAISEDINNER,BF_RECT);
+			}
+			EndPaint(hwnd,&ps);
 		}
 		break;
 	case WM_NOTIFY:
@@ -109,7 +135,7 @@ int add_edit_pane(HWND hparent)
 	if(hedit_pane){
 		RECT rect={0};
 		int w,h,x,y,id;
-		old_wproc_edit=SetWindowLong(hedit_pane,GWL_WNDPROC,(LONG)wproc_edit_pane);
+		//old_wproc_edit=SetWindowLong(hedit_pane,GWL_WNDPROC,(LONG)wproc_edit_pane);
 		get_max_edit_area(&rect);
 		x=rect.left;
 		y=rect.top;

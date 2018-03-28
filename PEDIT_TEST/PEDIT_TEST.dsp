@@ -596,6 +596,10 @@ SOURCE=.\menubar.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\output_win.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\pedit_test.c
 # End Source File
 # Begin Source File

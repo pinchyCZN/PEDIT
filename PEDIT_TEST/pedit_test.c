@@ -21,8 +21,11 @@ int setup_panels(HWND hwnd)
 	int result=FALSE;
 	HWND hedit=0;
 	add_statusbar(hwnd);
-	add_edit_pane(hwnd);
-	add_edit(&hedit);
+
+//	add_edit_pane(hwnd);
+//	add_edit(&hedit);
+//	add_edit_pane(hwnd);
+//	add_edit(&hedit);
 	add_menubar(hwnd);
 	if(hedit){
 		char *tmp=malloc(0x100000);
