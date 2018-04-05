@@ -10,7 +10,7 @@ HMENU hmenu=0;
 
 WNDPROC menu_proc(HWND hwnd,UINT msg,WPARAM wparam,LPARAM lparam)
 {
-	print_msg(msg,wparam,lparam);
+//	print_msg(msg,wparam,lparam);
 	switch(msg){
 	case WM_SETCURSOR:
 		{

@@ -41,6 +41,29 @@ int add_pane(HWND hparent,HWND hwnd,int anchor,int id)
 	}
 	return result;
 }
+int tile_panes(HWND hparent)
+{
+	int i;
+	RECT rparent;
+	int w,h;
+	if(pane_count<=0)
+		return 0;
+	GetClientRect(hparent,&rparent);
+	w=rparent.right-rparent.left;
+	w=w/pane_count;
+	h=rparent.bottom-rparent.top;
+	for(i=0;i<pane_count;i++){
+		struct CONTROL_ANCHOR *ca;
+		RECT rect;
+		rect=rparent;
+		rect.left=i*w;
+		rect.right=(i+1)*w;
+		ca=&pane_list[i];
+		SetWindowPos(ca->hwnd,NULL,rect.left,rect.top,w,h,SWP_NOZORDER);
+	}
+	anchor_init_by_id(hparent,pane_list,pane_count);
+	return 0;
+}
 int add_default_pane(HWND hparent)
 {
 	int result=FALSE;

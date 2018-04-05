@@ -20,12 +20,13 @@ int setup_panels(HWND hwnd)
 {
 	int result=FALSE;
 	HWND hedit=0;
-	add_statusbar(hwnd);
+	//add_statusbar(hwnd);
 
-//	add_edit_pane(hwnd);
+	add_edit_pane(hwnd);
 //	add_edit(&hedit);
-//	add_edit_pane(hwnd);
+	add_edit_pane(hwnd);
 //	add_edit(&hedit);
+	tile_panes(hwnd);
 	add_menubar(hwnd);
 	if(hedit){
 		char *tmp=malloc(0x100000);
@@ -66,12 +67,52 @@ LRESULT CALLBACK DialogProc(HWND hwnd,UINT msg,WPARAM wparam,LPARAM lparam)
 	case WM_MOVING:
 		window_move(hwnd);
 		break;
+	case WM_KEYDOWN:
+		printf("key\n");
+		break;
+	case WM_PAINT:
+		{
+			extern int LMB;
+			if(LMB && 0){
+				PAINTSTRUCT ps;
+				HDC hdc;
+				RECT rect;
+				HWND htmp=hwnd;
+				//htmp=GetParent(hwnd);
+				hdc=BeginPaint(htmp,&ps);
+				GetClientRect(htmp,&rect);
+				//hdc=BeginPaint(htmp,&ps);
+				if(hdc){
+					HBRUSH hbr;
+					hbr=CreateHatchBrush(HS_DIAGCROSS,0x7F007F);
+					if(hbr){
+						SelectObject(hdc,hbr);
+						Rectangle(hdc,rect.left,rect.top,rect.right,rect.bottom);
+						DeleteObject(hbr);
+					}
+					//rect=ps.rcPaint;
+					//int x=rand()%4;
+					//x=0;
+					//x+=10;
+					//rect.left=10;
+					//rect.right=30;
+					//rect.top=40;
+					//rect.bottom=60;
+					//rect.bottom-=2;
+					//InflateRect(&rect,-x,-x);
+					//DrawFocusRect(hdc,&rect); //EDGE_RAISED,BF_RECT);
+					EndPaint(htmp,&ps);
+					return 0;
+				}
+			}
+		}
+		break;
 	case WM_COMMAND:
 		{
 			int id=LOWORD(wparam);
 			switch(id){
 			case IDCANCEL:
-				PostMessage(hwnd,WM_CLOSE,0,0);
+//				PostMessage(hwnd,WM_CLOSE,0,0);
 				break;
 			}
 		}
@@ -111,10 +152,14 @@ int WINAPI WinMain(HINSTANCE hinstance,HINSTANCE hprevinstance,LPSTR cmdline,int
 		if (ret==-1){
 			break;
 		}
-		else if(!IsDialogMessage(hpedit,&msg)){
+		else{
+		//if(!IsDialogMessage(hpedit,&msg)){
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
 		}
+//		else{
+//			print_msg(msg.message,msg.lParam,msg.wParam,msg.hwnd);
+//		}
 	}
 	return 0;
 }

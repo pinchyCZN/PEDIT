@@ -99,6 +99,10 @@ BEGIN
     BEGIN
         MENUITEM "&Style colors",               IDM_STYLECOLORS
     END
+    POPUP "Window"
+    BEGIN
+        MENUITEM "Add window",                  IDM_ADDWINDOW
+    END
 END
 
 #endif    // English (U.S.) resources
