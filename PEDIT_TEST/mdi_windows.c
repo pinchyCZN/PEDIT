@@ -7,92 +7,122 @@ extern HWND hpedit;
 struct CONTROL_ANCHOR *pane_list=0;
 unsigned int pane_count=0;
 
-static int current_child_id=1000;
+int compare_int(const void *a,const void *b)
+{
+	int x,y;
+	x=((int*)a)[0];
+	y=((int*)b)[0];
+	if(x<y)
+		return -1;
+	else if(x==y)
+		return 0;
+	else
+		return 1;
+}
 int get_new_child_id()
 {
-	int result;
-	current_child_id&=0x3FFF;
-	if(0==current_child_id)
-		current_child_id=1;
-	result=current_child_id;
-	current_child_id++;
+	int result=0;
+	int i;
+	int *list;
+	if(0==pane_count)
+		return result;
+	list=malloc(pane_count*sizeof(int));
+	if(0==list)
+		return result;
+	for(i=0;i<pane_count;i++){
+		list[i]=pane_list[i].ctrl_id;
+	}
+	qsort(list,pane_count,sizeof(int),compare_int);
+	result=list[0];
+	for(i=1;i<pane_count;i++){
+		int x=list[i];
+		int delta;
+		delta=x-result;
+		if(delta>1){
+			break;
+		}
+		result=list[i];
+	}
+	result++;
+	free(list);
 	return result;
 }
 
 int add_pane(HWND hparent,HWND hwnd,int anchor,int id)
 {
 	int result=FALSE;
-	struct CONTROL_ANCHOR tmp={0};
 	void *ptr;
 	pane_count++;
 	ptr=realloc(pane_list,sizeof(struct CONTROL_ANCHOR)*pane_count);
 	if(ptr){
+		struct CONTROL_ANCHOR tmp={0};
 		int index=pane_count-1;
 		pane_list=ptr;
 		pane_list=(struct CONTROL_ANCHOR *)ptr;
 		tmp.ctrl_id=id;
 		tmp.anchor_mask=anchor;
 		GetClientRect(hparent,&tmp.rect_parent);
-		GetWindowRect(hwnd,&tmp.rect_ctrl);
-		MapWindowPoints(NULL,hparent,(PPOINT)&tmp.rect_ctrl,2);
 		tmp.hwnd=hwnd;
 		tmp.initialized=1;
 		pane_list[index]=tmp;
+		result=TRUE;
 	}
 	return result;
 }
-int tile_panes(HWND hparent)
+int get_snap_bias(HWND hwnd)
 {
 	int i;
+	for(i=0;i<pane_count;i++){
+		struct CONTROL_ANCHOR *ca;
+		ca=&pane_list[i];
+		if(hwnd==ca->hwnd)
+			return ca->snap_bias;
+	}
+	return 0;
+}
+int tile_panes(HWND hparent)
+{
+	int i,j;
 	RECT rparent;
-	int w,h;
+	int pw,ph;
 	if(pane_count<=0)
 		return 0;
 	GetClientRect(hparent,&rparent);
-	w=rparent.right-rparent.left;
-	w=w/pane_count;
-	h=rparent.bottom-rparent.top;
+	pw=rparent.right-rparent.left;
+	ph=rparent.bottom-rparent.top;
+
 	for(i=0;i<pane_count;i++){
 		struct CONTROL_ANCHOR *ca;
 		RECT rect;
+		int w,h,x,y;
+		int snap_bias=0;
 		rect=rparent;
-		rect.left=i*w;
-		rect.right=(i+1)*w;
-		ca=&pane_list[i];
-		SetWindowPos(ca->hwnd,NULL,rect.left,rect.top,w,h,SWP_NOZORDER);
-	}
-	anchor_init_by_id(hparent,pane_list,pane_count);
-	return 0;
-}
-int add_default_pane(HWND hparent)
-{
-	int result=FALSE;
-	int id;
-	ATOM panel_class;
-	id=get_new_child_id();
-	panel_class=get_generic_panel_atom();
-	/*
-	hedit_pane=CreateWindow(edit_class,TEXT("EDIT_PANEL"),WS_CHILD|WS_VISIBLE,
-			0,0,0,0,hparent,id,ghinstance,0);
-	if(hedit_pane){
-		RECT rect={0};
-		int w,h,x,y,id;
-		//old_wproc_edit=SetWindowLong(hedit_pane,GWL_WNDPROC,(LONG)wproc_edit_pane);
-		get_max_edit_area(&rect);
+		w=pw;
+		h=ph;
+		if(i<3){
+			rect.left=(w/3)*i;
+			rect.top=0;
+			rect.right=rect.left+w/3;
+			rect.bottom=h/2;
+			snap_bias=0;
+		}else{
+			rect.left=(w/2)*(i-3);
+			rect.top=h/2;
+			rect.right=rect.left+w/2;
+			rect.bottom=h;
+			snap_bias=1;
+		}
 		x=rect.left;
 		y=rect.top;
 		w=rect.right-rect.left;
 		h=rect.bottom-rect.top;
-//		w/=2;
-//		h/=2;
-
-		SetWindowPos(hedit_pane,NULL,x,y,w,h,SWP_NOZORDER|SWP_SHOWWINDOW);
-		id=get_new_child_id();
-		add_pane(hparent,hedit_pane,ANCHOR_LEFT|ANCHOR_RIGHT|ANCHOR_TOP|ANCHOR_BOTTOM,id);
-		result=TRUE;
+		ca=&pane_list[i];
+		ca->snap_bias=snap_bias;
+		ca->rect_ctrl=rect;
 	}
-*/
-	return result;
+	
+	anchor_init_by_id(hparent,pane_list,pane_count);
+	return 0;
 }
 int get_max_edit_area(RECT *rect)
 {
@@ -137,87 +167,7 @@ int window_move(HWND hwnd)
 	return 0;
 }
 
-WNDPROC panel_wndproc(HWND hwnd,UINT msg,WPARAM wparam,LPARAM lparam)
-{
-	switch(msg){
-	case WM_SIZE:
-		{
-			resize_edit_list(hwnd);
-		}
-		break;
-	case WM_LBUTTONUP:
-		{
-			static int show=FALSE;
-			show_menu(show);
-			show=!show;
-			adjust_for_menu();
-		}
-		break;
-	case WM_PAINT:
-		{
-			RECT rect,ro;
-			PAINTSTRUCT ps={0};
-			HDC hdc=BeginPaint(hwnd,&ps);
-			if(!hdc)
-				break;
-			GetClientRect(hwnd,&rect);
-			ro=rect;
-			FillRect(hdc,&rect,(HBRUSH)(COLOR_BTNFACE+1));
-			rect.left+=10;
-			rect.top+=4;
-			rect.right-=20;
-			if(rect.right>0){
-				rect.bottom=rect.top+3;
-				DrawEdge(hdc,&rect,BDR_RAISEDINNER,BF_RECT);
-				rect.top+=4;
-				rect.bottom+=4;
-				DrawEdge(hdc,&rect,BDR_RAISEDINNER,BF_RECT);
-			}
-			EndPaint(hwnd,&ps);
-		}
-		break;
-	}
-	return DefWindowProc(hwnd,msg,wparam,lparam);
-}
 
-int get_panel_atom(const char *name,WNDPROC *wndproc)
-{
-	ATOM result;
-	WNDCLASSA wclass={0};
-	wclass.hInstance=ghinstance;
-	wclass.hCursor=NULL;
-	wclass.hbrBackground=(HBRUSH)(COLOR_BACKGROUND+1); //(HBRUSH)(COLOR_BTNFACE+1);
-	wclass.lpszClassName=name;
-	wclass.lpfnWndProc=(WNDPROC)wndproc;
-	result=RegisterClass(&wclass);
-	return result;
-}
-
-int get_generic_panel_atom()
-{
-	static ATOM panel_class=0;
-	if(0==panel_class){
-		get_panel_atom("PANEL",panel_wndproc);
-	}
-	return panel_class;
-}
-
-int get_edit_panel_atom(WNDPROC *wndproc)
-{
-	static ATOM edit_class=0;
-	if(0==edit_class){
-		edit_class=get_panel_atom("EDIT_PANEL",wndproc);
-	}
-	return edit_class;
-}
-int get_console_panel_atom(WNDPROC *wndproc)
-{
-	static ATOM console_class=0;
-	if(0==console_class){
-		console_class=get_panel_atom("CONSOLE_PANEL",wndproc);
-	}
-	return console_class;
-}
 int get_menu_height(HWND hwnd)
 {
 	int height=0;
@@ -250,6 +200,54 @@ int adjust_for_menu()
 		//rect->top+=delta;
 		//rect->bottom+=delta;
 		result=delta;
+	}
+	return result;
+}
+
+int paint_main_win(HWND hwnd)
+{
+	HDC hdc;
+	PAINTSTRUCT ps;
+	hdc=BeginPaint(hwnd,&ps);
+	if(hdc){
+		int i;2
+		for(i=0;i<pane_count;i++){
+			struct CONTROL_ANCHOR *ca;
+			RECT *rc;
+			RECT rect;
+			ca=&pane_list[i];
+			rc=&ca->rect_ctrl;
+			DrawFrameControl(hdc,rc,DFC_BUTTON,DFCS_BUTTONPUSH);
+			rect=*rc;			
+			rect.left+=10;
+			rect.top+=4;
+			rect.right-=20;
+			if(rect.right>0){
+				rect.bottom=rect.top+3;
+				DrawEdge(hdc,&rect,BDR_RAISEDINNER,BF_RECT);
+				rect.top+=4;
+				rect.bottom+=4;
+				DrawEdge(hdc,&rect,BDR_RAISEDINNER,BF_RECT);
+			}
+		}
+		EndPaint(hdc,&ps);
+	}
+
+}
+int mouse_pos_status(int x,int y)
+{
+	int result=0;
+	int i;
+	for(i=0;i<pane_count;i++){
+		struct CONTROL_ANCHOR *ca;
+		int l,r,t,b;
+		ca=&pane_list[i];
+		l=ca->rect_ctrl.left;
+		r=ca->rect_ctrl.right;
+		t=ca->rect_ctrl.top;
+		b=ca->rect_ctrl.bottom;
+		if(x>=l && x<=r){
+		}
 	}
 	return result;
 }

@@ -12,14 +12,6 @@ int anchor_init_by_id(HWND hparent,struct CONTROL_ANCHOR *clist,int clist_len)
 		struct CONTROL_ANCHOR *anchor;
 		anchor=&clist[i];
 		anchor->rect_parent=rparent;
-		hctrl=GetDlgItem(hparent,anchor->ctrl_id);
-		if(hctrl){
-			RECT rctrl={0};
-			GetWindowRect(hctrl,&rctrl);
-			MapWindowPoints(NULL,hparent,(PPOINT)&rctrl,2);
-			anchor->rect_ctrl=rctrl;
-			anchor->hwnd=hctrl;
-		}
 		anchor->initialized=1;
 	}
 	return 0;

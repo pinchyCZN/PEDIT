@@ -6,12 +6,16 @@
 #define ANCHOR_BOTTOM 8
 #define ANCHOR_HCENTER 16
 
+#define MOUSE_DIVIDER 1
+#define MOUSE_DRAG 2
+
 struct CONTROL_ANCHOR{
 	int ctrl_id;
 	int anchor_mask;
+	int snap_bias;
 	RECT rect_ctrl,rect_parent;
 	HWND hwnd;
-	void *child;
+	char name[80];
 	int initialized;
 };
 

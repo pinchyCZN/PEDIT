@@ -21,13 +21,15 @@ int setup_panels(HWND hwnd)
 	int result=FALSE;
 	HWND hedit=0;
 	//add_statusbar(hwnd);
+	add_menubar(hwnd);
 
 	add_edit_pane(hwnd);
-//	add_edit(&hedit);
+	add_edit_pane(hwnd);
+	add_edit_pane(hwnd);
+	add_edit_pane(hwnd);
 	add_edit_pane(hwnd);
 //	add_edit(&hedit);
 	tile_panes(hwnd);
-	add_menubar(hwnd);
 	if(hedit){
 		char *tmp=malloc(0x100000);
 		int i;
@@ -53,10 +55,16 @@ int setup_panels(HWND hwnd)
 */
 	return result;
 }
+static int LMB=0;
+static int DRAG=0;
+static POINT pclick={0};
+
 LRESULT CALLBACK DialogProc(HWND hwnd,UINT msg,WPARAM wparam,LPARAM lparam)
 {
-//	if(!(msg==WM_SETCURSOR || msg==WM_NCHITTEST || msg==WM_MOUSEFIRST || msg==WM_NCMOUSEMOVE))
-//		print_msg(msg,wparam,lparam);
+	if(!(msg==WM_SETCURSOR || msg==WM_NCHITTEST || msg==WM_MOUSEFIRST || msg==WM_NCMOUSEMOVE)){
+		printf("--");
+		print_msg(msg,wparam,lparam,hwnd);
+	}
 
 	switch(msg){
 	case WM_INITDIALOG:
@@ -68,43 +76,42 @@ LRESULT CALLBACK DialogProc(HWND hwnd,UINT msg,WPARAM wparam,LPARAM lparam)
 		window_move(hwnd);
 		break;
 	case WM_KEYDOWN:
-		printf("key\n");
+		{
+			extern HWND hmovwin;
+			int key=wparam;
+			printf("key=%02X\n",wparam);
+			if(key==VK_ESCAPE){
+				PostQuitMessage(0);
+			}
+		}
+		break;
+	case WM_MOUSEMOVE:
+		{
+			int x,y;
+			x=LOWORD(lparam);
+			y=HIWORD(lparam);
+			if(LMB)
+				DRAG=1;
+		}
+		break;
+	case WM_LBUTTONDOWN:
+		{
+			int x,y;
+			x=LOWORD(lparam);
+			y=HIWORD(lparam);
+			LMB=1;
+			DRAG=0;
+		}
+		break;
+	case WM_LBUTTONUP:
+		{
+			LMB=0;
+			DRAG=0;
+		}
 		break;
 	case WM_PAINT:
 		{
-			extern int LMB;
-			if(LMB && 0){
-				PAINTSTRUCT ps;
-				HDC hdc;
-				RECT rect;
-				HWND htmp=hwnd;
-				//htmp=GetParent(hwnd);
-				hdc=BeginPaint(htmp,&ps);
-				GetClientRect(htmp,&rect);
-				//hdc=BeginPaint(htmp,&ps);
-				if(hdc){
-					HBRUSH hbr;
-					hbr=CreateHatchBrush(HS_DIAGCROSS,0x7F007F);
-					if(hbr){
-						SelectObject(hdc,hbr);
-						Rectangle(hdc,rect.left,rect.top,rect.right,rect.bottom);
-						DeleteObject(hbr);
-					}
-					//rect=ps.rcPaint;
-					//int x=rand()%4;
-					//x=0;
-					//x+=10;
-					//rect.left=10;
-					//rect.right=30;
-					//rect.top=40;
-					//rect.bottom=60;
-					//rect.bottom-=2;
-					//InflateRect(&rect,-x,-x);
-					//DrawFocusRect(hdc,&rect); //EDGE_RAISED,BF_RECT);
-					EndPaint(htmp,&ps);
-					return 0;
-				}
-			}
+			paint_main_win(hwnd);
 		}
 		break;
 	case WM_COMMAND:
@@ -129,8 +136,6 @@ LRESULT CALLBACK DialogProc(HWND hwnd,UINT msg,WPARAM wparam,LPARAM lparam)
 int WINAPI WinMain(HINSTANCE hinstance,HINSTANCE hprevinstance,LPSTR cmdline,int cmdshow)
 {
 
-	int ret;
-	MSG msg;
 	INITCOMMONCONTROLSEX ctrls;
 
 	ghinstance=hinstance;
@@ -148,13 +153,15 @@ int WINAPI WinMain(HINSTANCE hinstance,HINSTANCE hprevinstance,LPSTR cmdline,int
 	setup_debug(hpedit);
 	ShowWindow(hpedit,SW_SHOW);
 	setup_panels(hpedit);
-	while ((ret=GetMessage(&msg,NULL,0,0))!=0){
-		if (ret==-1){
+	while (1){
+		int ret;
+		MSG msg;
+		ret=GetMessage(&msg,NULL,0,0);
+		if(-1==ret || 0==ret){
 			break;
-		}
-		else{
+		}else{
 		//if(!IsDialogMessage(hpedit,&msg)){
-			TranslateMessage(&msg);
+			//TranslateMessage(&msg);
 			DispatchMessage(&msg);
 		}
 //		else{
