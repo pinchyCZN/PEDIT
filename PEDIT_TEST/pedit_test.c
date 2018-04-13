@@ -62,8 +62,8 @@ static POINT pclick={0};
 LRESULT CALLBACK DialogProc(HWND hwnd,UINT msg,WPARAM wparam,LPARAM lparam)
 {
 	if(!(msg==WM_SETCURSOR || msg==WM_NCHITTEST || msg==WM_MOUSEFIRST || msg==WM_NCMOUSEMOVE)){
-		printf("--");
-		print_msg(msg,wparam,lparam,hwnd);
+		//printf("--");
+		//print_msg(msg,wparam,lparam,hwnd);
 	}
 
 	switch(msg){
@@ -92,6 +92,12 @@ LRESULT CALLBACK DialogProc(HWND hwnd,UINT msg,WPARAM wparam,LPARAM lparam)
 			y=HIWORD(lparam);
 			if(LMB)
 				DRAG=1;
+			{
+				int status=mouse_pos_status(x,y);
+				if(status){
+					SetCursor(LoadCursor(NULL,IDC_SIZEWE));
+				}
+			}
 		}
 		break;
 	case WM_LBUTTONDOWN:

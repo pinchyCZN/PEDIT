@@ -210,7 +210,7 @@ int paint_main_win(HWND hwnd)
 	PAINTSTRUCT ps;
 	hdc=BeginPaint(hwnd,&ps);
 	if(hdc){
-		int i;2
+		int i;
 		for(i=0;i<pane_count;i++){
 			struct CONTROL_ANCHOR *ca;
 			RECT *rc;
@@ -247,6 +247,23 @@ int mouse_pos_status(int x,int y)
 		t=ca->rect_ctrl.top;
 		b=ca->rect_ctrl.bottom;
 		if(x>=l && x<=r){
+			int deltaxl,deltaxr;
+			deltaxl=x-l;
+			deltaxr=r-x;
+			if(y>=t && y<=b){
+				int deltayt,deltayb;
+				deltayt=y-t;
+				deltayb=b-y;
+				printf("xl=%i xr=%i\n",deltaxl,deltaxr);
+				if(deltaxl<=5){
+					if(deltayt<=5)
+						return 0;
+					else if(deltayb<=5)
+						return 0;
+					else
+						return 1;
+				}
+			}
 		}
 	}
 	return result;
