@@ -59,11 +59,22 @@ static int LMB=0;
 static int DRAG=0;
 static POINT pclick={0};
 
+int set_mouse_cursor(int x,int y)
+{
+	int status=mouse_pos_status(x,y);
+	if(1==status){
+		SetCursor(LoadCursor(NULL,IDC_SIZEWE));
+	}else if(2==status){
+		SetCursor(LoadCursor(NULL,IDC_SIZENS));
+	}
+	return status;
+}
+
 LRESULT CALLBACK DialogProc(HWND hwnd,UINT msg,WPARAM wparam,LPARAM lparam)
 {
-	if(!(msg==WM_SETCURSOR || msg==WM_NCHITTEST || msg==WM_MOUSEFIRST || msg==WM_NCMOUSEMOVE)){
-		//printf("--");
-		//print_msg(msg,wparam,lparam,hwnd);
+	if(!( /*msg==WM_SETCURSOR ||*/ msg==WM_NCHITTEST || msg==WM_MOUSEFIRST || msg==WM_NCMOUSEMOVE)){
+		printf("--");
+		print_msg(msg,wparam,lparam,hwnd);
 	}
 
 	switch(msg){
@@ -88,15 +99,15 @@ LRESULT CALLBACK DialogProc(HWND hwnd,UINT msg,WPARAM wparam,LPARAM lparam)
 	case WM_MOUSEMOVE:
 		{
 			int x,y;
+			int cursor=0;
 			x=LOWORD(lparam);
 			y=HIWORD(lparam);
 			if(LMB)
 				DRAG=1;
-			{
-				int status=mouse_pos_status(x,y);
-				if(status){
-					SetCursor(LoadCursor(NULL,IDC_SIZEWE));
-				}
+			cursor=set_mouse_cursor(x,y);
+			if(cursor){
+				if(DRAG)
+					resize_panel(cursor,x,y,pclick.x,pclick.y);
 			}
 		}
 		break;
@@ -105,8 +116,11 @@ LRESULT CALLBACK DialogProc(HWND hwnd,UINT msg,WPARAM wparam,LPARAM lparam)
 			int x,y;
 			x=LOWORD(lparam);
 			y=HIWORD(lparam);
+			pclick.x=x;
+			pclick.y=y;
 			LMB=1;
 			DRAG=0;
+			set_mouse_cursor(x,y);
 		}
 		break;
 	case WM_LBUTTONUP:

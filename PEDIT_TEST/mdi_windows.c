@@ -254,17 +254,62 @@ int mouse_pos_status(int x,int y)
 				int deltayt,deltayb;
 				deltayt=y-t;
 				deltayb=b-y;
-				printf("xl=%i xr=%i\n",deltaxl,deltaxr);
-				if(deltaxl<=5){
+//				printf("xl=%i xr=%i\n",deltaxl,deltaxr);
+				if(deltaxl<=5 || deltaxr<=5){
 					if(deltayt<=5)
 						return 0;
 					else if(deltayb<=5)
 						return 0;
 					else
 						return 1;
+				}else if(deltayt<=5 || deltayb<=5){
+					if(deltaxl<=5)
+						return 0;
+					else if(deltaxr<=5)
+						return 0;
+					else
+						return 2;
 				}
 			}
 		}
 	}
 	return result;
+}
+
+int is_inside(int x,int y,RECT *rect)
+{
+	int result=FALSE;
+	if(x>=rect->left && x<=rect->right){
+		if(y>=rect->top && y<=rect->bottom){
+			result=TRUE;
+		}
+	}
+	return TRUE;
+}
+
+int resize_panel(int type,int x,int y,int ox,int oy)
+{
+	int i;
+	extern HWND hpedit;
+	for(i=0;i<pane_count;i++){
+		struct CONTROL_ANCHOR *ca=&pane_list[i];
+		int inside=FALSE;
+		int ldx,rdx,tdx,bdx;
+
+		inside=is_inside(x,y,&ca->rect_ctrl);
+		ldx=x-ca->rect_ctrl.left;
+		rdx=ca->rect_ctrl.left-x;
+		tdx=y-ca->rect_ctrl.top;
+		bdx=ca->rect_ctrl.bottom-y;
+		switch(type){
+		case 1: //WE
+			if(ldx>5 && inside){
+				ca->rect_ctrl.left++;
+				InvalidateRect(hpedit,NULL,TRUE);
+			}
+			break;
+		case 2: //NS
+			break;
+		}
+	}
 }
