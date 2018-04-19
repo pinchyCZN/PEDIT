@@ -1,4 +1,5 @@
 #include <windows.h>
+#include <stdlib.h>
 #include "anchor_system.h"
 
 extern HINSTANCE ghinstance;
@@ -48,6 +49,29 @@ int get_new_child_id()
 	return result;
 }
 
+int init_drag()
+{
+	int i;
+	for(i=0;i<pane_count;i++){
+		struct CONTROL_ANCHOR *ca=&pane_list[i];
+		ca->rect_drag=ca->rect_ctrl;
+		ca->drag=1;
+	}
+	return TRUE;
+}
+int end_drag(int restore)
+{
+	int i;
+	for(i=0;i<pane_count;i++){
+		struct CONTROL_ANCHOR *ca=&pane_list[i];
+		if(ca->drag){
+			if(!restore)
+				ca->rect_ctrl=ca->rect_drag;
+		}
+		ca->drag=0;
+	}
+	return TRUE;
+}
 int add_pane(HWND hparent,HWND hwnd,int anchor,int id)
 {
 	int result=FALSE;
@@ -119,6 +143,7 @@ int tile_panes(HWND hparent)
 		ca=&pane_list[i];
 		ca->snap_bias=snap_bias;
 		ca->rect_ctrl=rect;
+		printf("l=%i r=%i t=%i b=%i\n",x,x+w,y,y+h);
 	}
 	
 	anchor_init_by_id(hparent,pane_list,pane_count);
@@ -216,7 +241,10 @@ int paint_main_win(HWND hwnd)
 			RECT *rc;
 			RECT rect;
 			ca=&pane_list[i];
-			rc=&ca->rect_ctrl;
+			if(ca->drag)
+				rc=&ca->rect_drag;
+			else
+				rc=&ca->rect_ctrl;
 			DrawFrameControl(hdc,rc,DFC_BUTTON,DFCS_BUTTONPUSH);
 			rect=*rc;			
 			rect.left+=10;
@@ -234,8 +262,9 @@ int paint_main_win(HWND hwnd)
 	}
 
 }
-int mouse_pos_status(int x,int y)
+int mouse_pos_status(int x,int y,int *id,int *side,RECT *rect)
 {
+#define DIVIDER_SIZE 5
 	int result=0;
 	int i;
 	for(i=0;i<pane_count;i++){
@@ -248,27 +277,52 @@ int mouse_pos_status(int x,int y)
 		b=ca->rect_ctrl.bottom;
 		if(x>=l && x<=r){
 			int deltaxl,deltaxr;
+			int HLEFT,HRIGHT;
 			deltaxl=x-l;
 			deltaxr=r-x;
+			HLEFT=deltaxl<=DIVIDER_SIZE;
+			HRIGHT=deltaxr<=DIVIDER_SIZE;
 			if(y>=t && y<=b){
 				int deltayt,deltayb;
+				int VTOP,VBOT;
 				deltayt=y-t;
 				deltayb=b-y;
+				if(id)
+					*id=ca->ctrl_id;
+				if(rect)
+					*rect=ca->rect_ctrl;
+				VTOP=deltayt<=DIVIDER_SIZE;
+				VBOT=deltayb<=DIVIDER_SIZE;
 //				printf("xl=%i xr=%i\n",deltaxl,deltaxr);
-				if(deltaxl<=5 || deltaxr<=5){
-					if(deltayt<=5)
+
+				if(HLEFT || HRIGHT){
+					if(VTOP)
 						return 0;
-					else if(deltayb<=5)
+					else if(VBOT)
 						return 0;
-					else
+					else{
+						if(HLEFT)
+							if(side)
+								*side=0;
+						if(HRIGHT)
+							if(side)
+								*side=2;
 						return 1;
-				}else if(deltayt<=5 || deltayb<=5){
-					if(deltaxl<=5)
+					}
+				}else if(VTOP || VBOT){
+					if(HLEFT)
 						return 0;
-					else if(deltaxr<=5)
+					else if(HRIGHT)
 						return 0;
-					else
+					else{
+						if(VTOP)
+							if(side)
+								*side=1;
+						if(VBOT)
+							if(side)
+								*side=3;
 						return 2;
+					}
 				}
 			}
 		}
@@ -287,28 +341,117 @@ int is_inside(int x,int y,RECT *rect)
 	return TRUE;
 }
 
-int resize_panel(int type,int x,int y,int ox,int oy)
+int is_in_hband(RECT *rect,RECT *target)
+{
+	int result=FALSE;
+	if(rect->top < target->bottom){
+		if(rect->bottom > target->top)
+			result=TRUE;
+	}
+	return result;
+}
+int is_in_vband(RECT *rect,RECT *target)
+{
+	int result=FALSE;
+	if(rect->left < target->right){
+		if(rect->right > target->left)
+			result=TRUE;
+	}
+	return result;
+}
+#define MIN_WIN_WIDTH 15
+int update_neighbors(int id,int side,RECT *rect)
+{
+	int i,j;
+	for(i=0;i<pane_count;i++){
+		struct CONTROL_ANCHOR *ca=&pane_list[i];
+		RECT *crect;
+		int hband,vband;
+		if(id==ca->ctrl_id)
+			continue;
+		crect=&ca->rect_drag;
+		hband=is_in_hband(crect,rect);
+		vband=is_in_vband(crect,rect);
+		printf("id=%i hb=%i vb=%i\n",ca->ctrl_id,hband,vband);
+		if(hband){
+			if(vband){
+				int x;
+				switch(side){
+				case 0:
+					crect->right=rect->left;
+					x=crect->left+MIN_WIN_WIDTH;
+					if(crect->right<x){
+						crect->left=crect->right-MIN_WIN_WIDTH;
+					}
+					x=crect->right-MIN_WIN_WIDTH;
+					if(crect->left>x)
+						crect->left=x;
+					break;
+				case 2:
+					//ca->rect_ctrl.left=rect->right;
+					break;
+				}
+			}else{
+
+			}
+		}
+	}
+	return 0;
+}
+int clamp_control(int id,int side,RECT *rect)
+{
+	int x;
+	if(0==side){
+		x=rect->right-MIN_WIN_WIDTH;
+		if(rect->left>x)
+			rect->left=x;
+	}else if(2==side){
+		x=rect->left+MIN_WIN_WIDTH;
+		if(rect->right<x)
+			rect->right=x;
+	}
+	return 0;
+}
+int resize_panel(int id,int side,RECT *rect,int type,int x,int y,int ox,int oy)
 {
 	int i;
 	extern HWND hpedit;
 	for(i=0;i<pane_count;i++){
 		struct CONTROL_ANCHOR *ca=&pane_list[i];
+		RECT *crect;
 		int inside=FALSE;
-		int ldx,rdx,tdx,bdx;
+		int left,right,top,bottom;
+		int dx,dy;
+		if(id!=ca->ctrl_id){
+			continue;
+		}
+		crect=&ca->rect_drag;
+		dx=x-ox;
+		dy=y-oy;
+		left=rect->left+dx;
+		right=rect->right+dx;
+		inside= id==ca->ctrl_id;
+		printf("dx=%i dy=%i left=%i right=%i inside=%i side=%i\n",dx,dy,left,right,inside,side);
 
-		inside=is_inside(x,y,&ca->rect_ctrl);
-		ldx=x-ca->rect_ctrl.left;
-		rdx=ca->rect_ctrl.left-x;
-		tdx=y-ca->rect_ctrl.top;
-		bdx=ca->rect_ctrl.bottom-y;
 		switch(type){
 		case 1: //WE
-			if(ldx>5 && inside){
-				ca->rect_ctrl.left++;
-				InvalidateRect(hpedit,NULL,TRUE);
+			if(inside){
+				if(0==side){
+					int x;
+					crect->left=left;
+					clamp_control(id,side,crect);
+					update_neighbors(id,side,crect);
+					InvalidateRect(hpedit,NULL,TRUE);
+				}else if(2==side){
+					crect->right=right;
+					clamp_control(id,side,crect);
+					//update_neighbors(id,side,&ca->rect_ctrl);
+					InvalidateRect(hpedit,NULL,TRUE);
+				}
 			}
 			break;
 		case 2: //NS
+
 			break;
 		}
 	}

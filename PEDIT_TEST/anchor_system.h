@@ -14,6 +14,8 @@ struct CONTROL_ANCHOR{
 	int anchor_mask;
 	int snap_bias;
 	RECT rect_ctrl,rect_parent;
+	RECT rect_drag;
+	int drag;
 	HWND hwnd;
 	char name[80];
 	int initialized;

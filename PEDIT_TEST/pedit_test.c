@@ -58,10 +58,14 @@ int setup_panels(HWND hwnd)
 static int LMB=0;
 static int DRAG=0;
 static POINT pclick={0};
+static int ctrl_id=0;
+static int corner=0;
+static int cursor=0;
+static RECT orect={0};
 
-int set_mouse_cursor(int x,int y)
+int set_mouse_cursor(int x,int y,int *id,int *side,RECT *rect)
 {
-	int status=mouse_pos_status(x,y);
+	int status=mouse_pos_status(x,y,id,side,rect);
 	if(1==status){
 		SetCursor(LoadCursor(NULL,IDC_SIZEWE));
 	}else if(2==status){
@@ -86,29 +90,43 @@ LRESULT CALLBACK DialogProc(HWND hwnd,UINT msg,WPARAM wparam,LPARAM lparam)
 	case WM_MOVING:
 		window_move(hwnd);
 		break;
+	case WM_ACTIVATE:
+		{
+			extern int LMB,DRAG;
+			LMB=DRAG=0;
+		}
+		break;
 	case WM_KEYDOWN:
 		{
 			extern HWND hmovwin;
 			int key=wparam;
 			printf("key=%02X\n",wparam);
 			if(key==VK_ESCAPE){
+				if(LMB || DRAG){
+					end_drag(TRUE);
+					LMB=DRAG=0;
+					InvalidateRect(hwnd,NULL,TRUE);
+					break;
+				}
 				PostQuitMessage(0);
+			}
+			if(key==VK_F5){
+				tile_panes(hpedit);
+				InvalidateRect(hwnd,NULL,TRUE);
 			}
 		}
 		break;
 	case WM_MOUSEMOVE:
 		{
 			int x,y;
-			int cursor=0;
 			x=LOWORD(lparam);
 			y=HIWORD(lparam);
 			if(LMB)
 				DRAG=1;
-			cursor=set_mouse_cursor(x,y);
-			if(cursor){
-				if(DRAG)
-					resize_panel(cursor,x,y,pclick.x,pclick.y);
-			}
+			if(DRAG)
+				resize_panel(ctrl_id,corner,&orect,cursor,x,y,pclick.x,pclick.y);
+			else
+				set_mouse_cursor(x,y,NULL,NULL,NULL);
 		}
 		break;
 	case WM_LBUTTONDOWN:
@@ -120,13 +138,15 @@ LRESULT CALLBACK DialogProc(HWND hwnd,UINT msg,WPARAM wparam,LPARAM lparam)
 			pclick.y=y;
 			LMB=1;
 			DRAG=0;
-			set_mouse_cursor(x,y);
+			cursor=set_mouse_cursor(x,y,&ctrl_id,&corner,&orect);
+			init_drag();
 		}
 		break;
 	case WM_LBUTTONUP:
 		{
 			LMB=0;
 			DRAG=0;
+			end_drag(FALSE);
 		}
 		break;
 	case WM_PAINT:
