@@ -8,6 +8,9 @@ extern HWND hpedit;
 struct CONTROL_ANCHOR *pane_list=0;
 unsigned int pane_count=0;
 
+int show_divider=0;
+RECT divider={0};
+
 int compare_int(const void *a,const void *b)
 {
 	int x,y;
@@ -49,7 +52,27 @@ int get_new_child_id()
 	return result;
 }
 
-int init_drag()
+int update_divider(int edge,RECT *rect)
+{
+#define DIVIDER_WIDTH 4
+	switch(edge){
+	case 0: //W
+		divider.top=rect->top;
+		divider.bottom=rect->bottom;
+		divider.left=rect->left;
+		divider.right=divider.left+DIVIDER_WIDTH;
+		break;
+	case 2: //E
+		divider.top=rect->top;
+		divider.bottom=rect->bottom;
+		divider.left=rect->right-DIVIDER_WIDTH;
+		divider.right=rect->right;
+		break;
+	}
+	return 0;
+}
+
+int init_drag(int x,int y,int edge,int ctrl_id,RECT *rect)
 {
 	int i;
 	for(i=0;i<pane_count;i++){
@@ -57,6 +80,8 @@ int init_drag()
 		ca->rect_drag=ca->rect_ctrl;
 		ca->drag=1;
 	}
+	show_divider=TRUE;
+	update_divider(edge,rect);
 	return TRUE;
 }
 int end_drag(int restore)
@@ -70,6 +95,7 @@ int end_drag(int restore)
 		}
 		ca->drag=0;
 	}
+	show_divider=0;
 	return TRUE;
 }
 int add_pane(HWND hparent,HWND hwnd,int anchor,int id)
@@ -229,6 +255,21 @@ int adjust_for_menu()
 	return result;
 }
 
+HBRUSH get_hatch_handle()
+{
+	static HBITMAP hbmap=0;
+	static HBRUSH hbrush=0;
+	if(!hbmap){
+		BYTE bits[16]={0x55,0x55,0xAA,0xAA,0x55,0x55,0xAA,0xAA,
+			0x55,0x55,0xAA,0xAA,0x55,0x55,0xAA,0xAA};
+		hbmap=CreateBitmap(8,8,1,1,&bits);
+	}
+	if(hbmap){
+		hbrush=CreatePatternBrush(hbmap);
+	}
+	return hbrush;
+}
+
 int paint_main_win(HWND hwnd)
 {
 	HDC hdc;
@@ -256,6 +297,18 @@ int paint_main_win(HWND hwnd)
 				rect.top+=4;
 				rect.bottom+=4;
 				DrawEdge(hdc,&rect,BDR_RAISEDINNER,BF_RECT);
+			}
+		}
+		if(show_divider){
+			HBRUSH hbrush=get_hatch_handle();
+			if(hbrush){
+				int x,y,w,h;
+				SelectObject(hdc,hbrush);
+				x=divider.left;
+				y=divider.top;
+				w=divider.right-divider.left;
+				h=divider.bottom-divider.top;
+				PatBlt(hdc,x,y,w,h,PATINVERT);
 			}
 		}
 		EndPaint(hdc,&ps);
@@ -412,6 +465,7 @@ int clamp_control(int id,int side,RECT *rect)
 	}
 	return 0;
 }
+
 int resize_panel(int id,int side,RECT *rect,int type,int x,int y,int ox,int oy)
 {
 	int i;
@@ -441,11 +495,13 @@ int resize_panel(int id,int side,RECT *rect,int type,int x,int y,int ox,int oy)
 					crect->left=left;
 					clamp_control(id,side,crect);
 					update_neighbors(id,side,crect);
+					update_divider(side,crect);
 					InvalidateRect(hpedit,NULL,TRUE);
 				}else if(2==side){
 					crect->right=right;
 					clamp_control(id,side,crect);
 					//update_neighbors(id,side,&ca->rect_ctrl);
+					update_divider(side,crect);
 					InvalidateRect(hpedit,NULL,TRUE);
 				}
 			}

@@ -59,7 +59,7 @@ static int LMB=0;
 static int DRAG=0;
 static POINT pclick={0};
 static int ctrl_id=0;
-static int corner=0;
+static int edge=0;
 static int cursor=0;
 static RECT orect={0};
 
@@ -124,7 +124,7 @@ LRESULT CALLBACK DialogProc(HWND hwnd,UINT msg,WPARAM wparam,LPARAM lparam)
 			if(LMB)
 				DRAG=1;
 			if(DRAG)
-				resize_panel(ctrl_id,corner,&orect,cursor,x,y,pclick.x,pclick.y);
+				resize_panel(ctrl_id,edge,&orect,cursor,x,y,pclick.x,pclick.y);
 			else
 				set_mouse_cursor(x,y,NULL,NULL,NULL);
 		}
@@ -138,8 +138,11 @@ LRESULT CALLBACK DialogProc(HWND hwnd,UINT msg,WPARAM wparam,LPARAM lparam)
 			pclick.y=y;
 			LMB=1;
 			DRAG=0;
-			cursor=set_mouse_cursor(x,y,&ctrl_id,&corner,&orect);
-			init_drag();
+			cursor=set_mouse_cursor(x,y,&ctrl_id,&edge,&orect);
+			if(cursor){
+				printf("edge=%i\n",edge);
+				init_drag(x,y,edge,ctrl_id,&orect);
+			}
 		}
 		break;
 	case WM_LBUTTONUP:
@@ -147,6 +150,7 @@ LRESULT CALLBACK DialogProc(HWND hwnd,UINT msg,WPARAM wparam,LPARAM lparam)
 			LMB=0;
 			DRAG=0;
 			end_drag(FALSE);
+			InvalidateRect(hwnd,NULL,TRUE);
 		}
 		break;
 	case WM_PAINT:
